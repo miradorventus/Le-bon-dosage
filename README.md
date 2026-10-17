@@ -13,6 +13,7 @@ Calculs de chantier pour maçons, sur le téléphone : combien de sacs, de seaux
 - **Granulats** : castine, tout-venant, sable, gravier, en tonnes et en m³.
 - **Parpaings et briques** : nombre de blocs et mortier de montage.
 - **Treillis soudé** : nombre de panneaux selon la référence (PAF, ST 25 C...), recouvrement compris.
+- **Ouverture dans un mur** : béton et cages d'acier du linteau et des jambages (murs en pierre compris).
 - **Poteaux, chaînages, linteaux** : cages d'acier (HA 6 à 12), béton, ciment.
 
 L'eau est donnée **en seaux** (taille du seau réglable), et **par sac**.

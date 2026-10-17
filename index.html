@@ -131,6 +131,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <button role="tab" id="t-mur" aria-selected="false" data-tab="mur">Parpaings</button>
     <button role="tab" id="t-treillis" aria-selected="false" data-tab="treillis">Treillis</button>
     <button role="tab" id="t-poteau" aria-selected="false" data-tab="poteau">Poteaux</button>
+    <button role="tab" id="t-ouverture" aria-selected="false" data-tab="ouverture">Ouverture</button>
   </nav>
 
   <label class="seau" for="seau">Mon seau fait <input id="seau" type="number" inputmode="decimal" value="10"> litres</label>
@@ -309,6 +310,27 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <button class="btn add-list" data-add="treillis">Ajouter à la liste</button>
   </section>
 
+  <!-- OUVERTURE : LINTEAU + JAMBAGES -->
+  <section class="panel" id="p-ouverture" hidden>
+    <h2>Ouverture : linteau et jambages</h2>
+    <div class="grid2">
+      <label>Largeur de l'ouverture <small>m</small><input id="ou-l" type="number" inputmode="decimal" value="1.2"></label>
+      <label>Hauteur de l'ouverture <small>m</small><input id="ou-h" type="number" inputmode="decimal" value="2.15"></label>
+      <label>Épaisseur du mur <small>cm</small><input id="ou-ep" type="number" inputmode="decimal" value="50"></label>
+      <label>Hauteur du linteau <small>cm</small><input id="ou-hl" type="number" inputmode="decimal" value="20"></label>
+      <label>Appui du linteau <small>cm de chaque côté</small><input id="ou-app" type="number" inputmode="decimal" value="20"></label>
+      <label>Largeur des jambages <small>cm</small><input id="ou-jl" type="number" inputmode="decimal" value="20"></label>
+      <label>Jambages <select id="ou-jamb"><option value="2" selected>2 jambages</option><option value="1">1 jambage</option><option value="0">Linteau seul</option></select></label>
+      <label>Aciers <select id="ou-ha"><option value="8">4 HA 8</option><option value="10" selected>4 HA 10</option><option value="12">4 HA 12</option></select></label>
+      <label>Béton
+        <select id="ou-gran"><option value="mel">Ciment + mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
+      <label>Sac de ciment <small>kg</small>
+        <select id="ou-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
+    </div>
+    <div class="result" id="ou-res"></div>
+    <button class="btn add-list" data-add="ouverture">Ajouter à la liste</button>
+  </section>
+
   <!-- POTEAUX / CHAÎNAGES -->
   <section class="panel" id="p-poteau" hidden>
     <h2>Poteaux, chaînages, linteaux</h2>
@@ -409,6 +431,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <li><strong>Dosage crépi et enduit de façade</strong> : nombre de sacs et eau par sac (Weber.pral F, Weber.lite HR...).</li>
       <li><strong>Calcul colle carrelage</strong> selon le peigne (6x6, 9x9, demi-lune), en simple ou double encollage.</li>
       <li><strong>Calcul joint carrelage</strong> selon le format du carreau et la largeur du joint.</li>
+      <li><strong>Ouverture dans un mur en pierre</strong> : béton et ferraillage du linteau et des jambages.</li>
       <li><strong>Calcul chape</strong> à la bétonnière ou en m³ à commander à la toupie.</li>
       <li><strong>Nombre de parpaings et briques</strong> et mortier de montage.</li>
       <li><strong>Treillis soudé</strong> (PAF, ST 25 C...), <strong>ferraillage des poteaux et chaînages</strong>, <strong>castine, sable, gravier</strong> en tonnes.</li>
@@ -646,6 +669,33 @@ function calcJoints() {
     <dt>Eau par sac</dt><dd>${fmt(parseFloat(eau), 2)} L</dd></dl>
     ${hors ? `<div class="note">Ce joint est prévu pour des largeurs ${type === 'fin' ? 'de 1 à 4 mm' : 'de 5 à 50 mm'} : choisis l'autre joint.</div>` : ''}${CHECK}`;
 }
+// Ouverture dans un mur : linteau (portée + appuis) et jambages coulés sur toute l'épaisseur
+function calcOuverture() {
+  const L = num('ou-l'), H = num('ou-h'), ep = num('ou-ep') / 100, hl = num('ou-hl') / 100, app = num('ou-app') / 100, jl = num('ou-jl') / 100;
+  const nj = parseInt($('ou-jamb').value, 10), ha = num('ou-ha');
+  const lLint = L + 2 * app;
+  const vLint = lLint * hl * ep, vJamb = nj * H * jl * ep;
+  const vol = (vLint + vJamb) * 1.1; // 10 % de perte
+  const obra = $('ou-gran').value === 'obra', sac = num('ou-sac');
+  $('ou-sac').parentElement.hidden = obra;
+  // Cages du commerce de 6 m, 4 filants : une par linteau (jusqu'à 6 m), une par jambage
+  const cages = Math.ceil(lLint / 6) + nj * Math.ceil(H / 6);
+  const cage = `Cage 15x15 4 HA ${ha}, 6 m`;
+  const kgM = { 8: 0.395, 10: 0.617, 12: 0.888 }[ha] * 4;
+  const items = [[cage, cages, 'pièces']];
+  if (obra) items.push(['Béton sec OBRA C25/30', Math.ceil(vol * OBRA_SACS_M3), 'sacs de 25 kg']);
+  else items.push(['Ciment Lafarge', Math.ceil(vol * 350 / sac), `sacs de ${sac} kg`], ['Mélange à béton 0/20', r2(vol), 'm³']);
+  ACHATS.ouverture = { titre: `Ouverture ${fmt(L, 2)} x ${fmt(H, 2)} m, mur de ${fmt(num('ou-ep'), 0)} cm`, items };
+  $('ou-res').innerHTML = `<div class="big">${fmt(vol * 1000, 0)} <span>L de béton</span></div>
+    <dl class="rows"><dt>Linteau</dt><dd>${fmt(lLint, 2)} m x ${fmt(hl * 100, 0)} x ${fmt(ep * 100, 0)} cm (${fmt(vLint * 1000, 0)} L)</dd>
+    ${nj ? `<dt>Jambage${nj > 1 ? 's' : ''}</dt><dd>${nj} x ${fmt(H, 2)} m x ${fmt(jl * 100, 0)} x ${fmt(ep * 100, 0)} cm (${fmt(vJamb * 1000, 0)} L)</dd>` : ''}
+    ${obra ? `<dt>Béton sec OBRA C25/30</dt><dd>${Math.ceil(vol * OBRA_SACS_M3)} sacs de 25 kg</dd>
+    <dt>Eau</dt><dd>3 L par sac</dd>` : `<dt>Ciment (350 kg/m³)</dt><dd>${Math.ceil(vol * 350 / sac)} sacs de ${sac} kg</dd>
+    <dt>Mélange à béton 0/20</dt><dd>${fmt(vol, 2)} m³</dd>
+    <dt>Eau en tout</dt><dd>${eauTxt(vol * 350 * 0.49)}</dd>`}
+    <dt>Cages 4 HA ${ha}</dt><dd>${cages} de 6 m (≈ ${fmt(kgM * cages * 6, 0)} kg)</dd></dl>
+    <div class="note">Étaie le mur avant d'ouvrir. Dans un mur épais, on met souvent 2 cages côte à côte : la section et les aciers se décident selon la charge, demande conseil si le mur porte un étage ou une toiture. Béton un peu plus fluide pour bien remplir le coffrage, gravier 4/12 si c'est très ferraillé.</div>`;
+}
 function calcTreillis() {
   const L = num('tr-l'), W = num('tr-w'), r = num('tr-rec') / 100;
   const t = TREILLIS[num('tr-pan')] || TREILLIS[6];
@@ -750,7 +800,7 @@ $('np-list').addEventListener('click', e => {
 
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
-  ['crepi', 'colle', 'joints', 'semelle', 'dalle', 'chape', 'granulats', 'mur', 'treillis', 'poteau'].forEach(t => $('p-' + t).hidden = t !== b.dataset.tab);
+  ['crepi', 'colle', 'joints', 'semelle', 'dalle', 'chape', 'granulats', 'mur', 'treillis', 'poteau', 'ouverture'].forEach(t => $('p-' + t).hidden = t !== b.dataset.tab);
   try { localStorage.setItem('gachee-onglet', b.dataset.tab); } catch (e) {}
   if (demarre) $('p-' + b.dataset.tab).scrollIntoView({ behavior: 'smooth', block: 'start' });
 }));
@@ -774,6 +824,7 @@ document.querySelectorAll('#p-granulats input').forEach(i => i.addEventListener(
 document.querySelectorAll('#p-mur input, #p-mur select').forEach(i => i.addEventListener('input', calcMur));
 document.querySelectorAll('#p-treillis input, #p-treillis select').forEach(i => i.addEventListener('input', calcTreillis));
 document.querySelectorAll('#p-joints input, #p-joints select').forEach(i => i.addEventListener('input', calcJoints));
+document.querySelectorAll('#p-ouverture input, #p-ouverture select').forEach(i => i.addEventListener('input', calcOuverture));
 document.querySelectorAll('#p-poteau input, #p-poteau select').forEach(i => i.addEventListener('input', calcPoteau));
 try { const s = localStorage.getItem('gachee-seau'); if (s) $('seau').value = s; } catch (e) {}
 $('seau').addEventListener('input', () => {
@@ -872,7 +923,7 @@ try { stats = JSON.parse(localStorage.getItem('gachee-stats') || '{}'); } catch 
 function compte(key) { stats[key] = (stats[key] || 0) + 1; try { localStorage.setItem('gachee-stats', JSON.stringify(stats)); } catch (e) {} }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => compte(b.dataset.tab)));
 function texteAvis() {
-  const NOMS = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
+  const NOMS = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux', ouverture: 'Ouverture' };
   let t = `Avis sur Le Bon Dosage (${document.querySelector('footer').textContent.match(/Version [\d.]+/)?.[0] || ''}, ${new Date().toLocaleDateString('fr-FR')})\n\n${$('av-texte').value.trim() || '(pas de commentaire)'}`;
   if ($('av-stats').checked) {
     const util = Object.entries(stats).sort((a, b) => b[1] - a[1]).map(([k, n]) => `- ${NOMS[k] || k} : ouvert ${n} fois`).join('\n');
@@ -922,7 +973,7 @@ function remet(id) {
 }
 
 // Possibilités enregistrées : réglages d'un calcul gardés sous un nom, à rappeler plus tard
-const CALCS = { crepi: calcCrepi, colle: calcColle, joints: calcJoints, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau };
+const CALCS = { crepi: calcCrepi, colle: calcColle, joints: calcJoints, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau, ouverture: calcOuverture };
 let poss = {};
 try { poss = JSON.parse(localStorage.getItem('gachee-possibilites') || '{}'); } catch (e) { poss = {}; }
 const savePoss = () => { try { localStorage.setItem('gachee-possibilites', JSON.stringify(poss)); } catch (e) {} };
@@ -933,7 +984,7 @@ function renderPoss(key) {
   $('poss-del-' + key).hidden = true;
   renderGestion();
 }
-const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
+const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux', ouverture: 'Ouverture' };
 function renderGestion() {
   const rows = [];
   Object.keys(NOMS_CALC).forEach(k => (poss[k] || []).forEach((x, i) => rows.push(`<li><span>${esc(x.nom)}<small>${NOMS_CALC[k]}</small></span><button data-gk="${k}" data-gi="${i}">Supprimer</button></li>`)));
@@ -990,9 +1041,9 @@ remet('crepi-prod'); remet('colle-prod');
 applyProduct('crepi'); applyProduct('colle');
 CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
 try { const o = localStorage.getItem('gachee-onglet'); const b = o && document.querySelector(`.tabs button[data-tab="${o}"]`); if (b) b.click(); } catch (e) {}
-calcCrepi(); calcColle(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau();
+calcCrepi(); calcColle(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau(); calcOuverture();
 renderListe();
-const SEL_INFO = ['crepi-prod', 'colle-prod', 'jo-prod', 'mur-mortier', 'sem-gran', 'dal-gran', 'po-gran'];
+const SEL_INFO = ['crepi-prod', 'colle-prod', 'jo-prod', 'mur-mortier', 'sem-gran', 'dal-gran', 'po-gran', 'ou-gran'];
 SEL_INFO.forEach(id => { $(id).addEventListener('change', () => majInfo($(id))); $(id).addEventListener('input', () => majInfo($(id))); majInfo($(id)); });
 try { const v = localStorage.getItem('gachee-vue'); if (v && $('v-' + v)) vue(v); } catch (e) {}
 demarre = true;
