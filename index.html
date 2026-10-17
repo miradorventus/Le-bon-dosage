@@ -262,6 +262,8 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Longueur de mur <small>m</small><input id="mur-l" type="number" inputmode="decimal" value="24"></label>
       <label>Hauteur <small>m</small><input id="mur-h" type="number" inputmode="decimal" value="2.5"></label>
       <label>Ouvertures à déduire <small>m² (portes, fenêtres)</small><input id="mur-ouv" type="number" inputmode="decimal" value="6"></label>
+      <label>Mortier
+        <select id="mur-mortier"><option value="fait">Fait sur place (ciment + sable)</option><option value="obra">Prêt à gâcher OBRA M10, sac 25 kg (Chausson)</option></select></label>
       <label>Sac de ciment <small>kg</small>
         <select id="mur-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
       <label>Marge de casse <small>%</small><input id="mur-marge" type="number" inputmode="decimal" value="5"></label>
@@ -545,6 +547,19 @@ function calcMur() {
   const blocs = Math.ceil(surf * parseFloat(parM2) * (1 + num('mur-marge') / 100));
   const mortier = surf * parseFloat(ep) / 1000 * 1.1; // m³, avec 10 % de perte
   const sac = num('mur-sac'), ciment = mortier * 300;
+  const obra = $('mur-mortier').value === 'obra';
+  $('mur-sac').parentElement.hidden = obra;
+  if (obra) {
+    // Fiche technique OBRA M10 (Chausson, 2023) : 1 sac de 25 kg = 13 L de mortier = 0,5 m² de parpaings de 20 ; 3,5 L d'eau par sac
+    const sacs = Math.ceil(surf * parseFloat(ep) / 20 / 0.5);
+    ACHATS.mur = { titre: `Mur : ${fmt(surf, 1)} m²`, items: [[$('mur-bloc').selectedOptions[0].textContent, blocs, 'pièces'], ['Mortier OBRA M10', sacs, 'sacs de 25 kg']] };
+    $('mur-res').innerHTML = `<div class="big">${blocs} <span>blocs</span></div>
+    <dl class="rows"><dt>Surface de mur</dt><dd>${fmt(surf, 1)} m²</dd>
+    <dt>Mortier OBRA M10</dt><dd>${sacs} sacs de 25 kg</dd>
+    <dt>Eau par sac</dt><dd>3,5 L</dd></dl>
+    <div class="note">Chiffres de la fiche OBRA : 1 sac pour 0,5 m² de parpaings de 20. Vérifie le sac.</div>`;
+    return;
+  }
   ACHATS.mur = { titre: `Mur : ${fmt(surf, 1)} m²`, items: [[$('mur-bloc').selectedOptions[0].textContent, blocs, 'pièces'], ['Ciment Lafarge', Math.ceil(ciment / sac), `sacs de ${sac} kg`], ['Sable 0/4', r2(mortier), 'm³']] };
   $('mur-res').innerHTML = `<div class="big">${blocs} <span>blocs</span></div>
     <dl class="rows"><dt>Surface de mur</dt><dd>${fmt(surf, 1)} m²</dd>
