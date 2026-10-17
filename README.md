@@ -4,7 +4,7 @@ Calculs de chantier pour maçons, sur le téléphone : combien de sacs, de seaux
 
 👉 **Ouvrir l'appli : [miradorventus.github.io/Le-bon-dosage](https://miradorventus.github.io/Le-bon-dosage/)** (gratuite, sans compte, marche hors ligne)
 
-**Version 0.12.1 (prototype)** · fait avec un maçon, pour de vrais chantiers.
+**Version 0.12.2 (prototype)** · fait avec un maçon, pour de vrais chantiers.
 
 ## Ce qu'elle calcule
 - **Crépi / enduit** : sacs et eau, avec les valeurs des fiches Weber (pral F, weberlite F et G), ParexLanko ou tes propres produits.
@@ -17,7 +17,7 @@ Calculs de chantier pour maçons, sur le téléphone : combien de sacs, de seaux
 - **Parpaings et briques** : nombre de blocs et mortier de montage.
 - **Treillis soudé** : nombre de panneaux selon la référence (PAF, ST 25 C...), recouvrement compris.
 - **Ouverture dans un mur** : béton et cages d'acier du linteau et des jambages (murs en pierre compris).
-- **Escalier en béton** : nombre et hauteur des marches, giron (règle de Blondel) et béton de l'escalier coulé ; valeurs recommandées ou les tiennes.
+- **Escalier en béton** : nombre et hauteur des marches, giron (règle de Blondel) et béton de l'escalier coulé ; valeurs recommandées, d'après la longueur au sol, ou les tiennes.
 - **Poteaux, chaînages, linteaux** : cages d'acier (HA 6 à 12), béton, ciment.
 
 L'eau est donnée **en seaux** (taille du seau réglable), et **par sac**.

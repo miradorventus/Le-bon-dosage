@@ -67,6 +67,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 14px }
 .panel h2 { font-family: var(--f-display); font-size: 1.5rem; margin: 0 }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+.es-adj { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px }
 label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: .9rem; min-width: 0 }
 label small { font-weight: 400; color: var(--muted) }
 input, select { font: inherit; font-size: 1.15rem; padding: 10px 12px; border: 2px solid var(--line); border-radius: 6px;
@@ -348,7 +349,11 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Largeur <small>cm</small><input id="es-l" type="number" inputmode="decimal" value="90"></label>
       <label>Épaisseur de paillasse <small>cm</small><input id="es-e" type="number" inputmode="decimal" value="12"></label>
       <label>Marches
-        <select id="es-mode"><option value="reco">Recommandées</option><option value="perso">Mes valeurs</option></select></label>
+        <select id="es-mode"><option value="reco">Recommandées</option><option value="sol">Longueur au sol</option><option value="perso">Mes valeurs</option></select></label>
+    </div>
+    <div id="es-sol" hidden>
+      <label>Longueur au sol disponible <small>cm, de la 1re marche au palier</small><input id="es-rec" type="number" inputmode="decimal" value="400"></label>
+      <div class="es-adj"><button type="button" class="btn" id="es-moins">− 1 marche</button><button type="button" class="btn" id="es-plus">+ 1 marche</button><input id="es-adj" type="hidden" value="0"></div>
     </div>
     <div id="es-perso" hidden>
       <div class="grid2">
@@ -511,7 +516,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.12.1 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.12.2 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -759,11 +764,22 @@ function calcCarreaux() {
 $('ca-pose').addEventListener('change', () => { $('ca-marge').value = $('ca-pose').value; calcCarreaux(); });
 // Escalier droit coulé : marches par la règle de Blondel (2 h + g ≈ 63 cm, h ≈ 17 cm), béton = paillasse + marches
 function calcEscalier() {
-  const H = num('es-h'), w = num('es-l'), e = num('es-e'), perso = $('es-mode').value === 'perso';
-  $('es-perso').hidden = !perso;
+  const H = num('es-h'), w = num('es-l'), e = num('es-e'), mode = $('es-mode').value, perso = mode === 'perso';
+  $('es-perso').hidden = !perso; $('es-sol').hidden = mode !== 'sol';
   $('es-dos').parentElement.hidden = $('es-sac').parentElement.hidden = $('es-gran').value === 'obra';
-  const n = Math.max(1, Math.round(H / (perso ? num('es-hm') || 17 : 17)));
-  const h = H / n, g = perso ? num('es-g') : Math.round((63 - 2 * h) * 2) / 2;
+  let n = Math.max(1, Math.round(H / (perso ? num('es-hm') || 17 : 17)));
+  // Longueur imposée : nombre de marches le plus confortable (2 h + g proche de 63 cm, dans 60-64, marche ≤ 18 cm)
+  const nReco = n, recReco = (nReco - 1) * Math.round((63 - 2 * H / nReco) * 2) / 2;
+  if (mode === 'sol') {
+    const R = num('es-rec'); let best = Infinity;
+    for (let k = 2; k <= 40; k++) {
+      const hk = H / k, b = 2 * hk + R / (k - 1);
+      const d = Math.abs(b - 63) + (b < 60 || b > 64 ? 10 : 0) + (hk > 18 ? 10 : 0);
+      if (d < best) { best = d; n = k; }
+    }
+    n = Math.max(2, n + (parseInt($('es-adj').value, 10) || 0));
+  }
+  const h = H / n, g = perso ? num('es-g') : mode === 'sol' ? num('es-rec') / (n - 1) : Math.round((63 - 2 * h) * 2) / 2;
   const rec = (n - 1) * g, blondel = 2 * h + g;
   const L = Math.hypot(rec, H);
   const vol = (L * e * w + (n - 1) * h * g / 2 * w) / 1e6 * (1 + num('es-marge') / 100);
@@ -772,8 +788,9 @@ function calcEscalier() {
   $('es-res').innerHTML = `<div class="big">${n} <span>marches de ${fmt(h, 1)} cm</span></div>
     <dl class="rows"><dt>Giron</dt><dd>${fmt(g, 1)} cm</dd>
     <dt>2 hauteurs + 1 giron</dt><dd>${fmt(blondel, 1)} cm</dd>
-    <dt>Longueur au sol</dt><dd>${fmt(rec / 100, 2)} m</dd></dl>
-    ${hors ? '<div class="note">Hors des valeurs de confort courantes (2 hauteurs + 1 giron entre 60 et 64 cm, marche de 18 cm maxi).</div>' : ''}
+    <dt>Longueur au sol</dt><dd>${fmt(rec / 100, 2)} m</dd>
+    ${mode === 'sol' && +$('es-adj').value ? `<dt>Ajusté à la main</dt><dd>${+$('es-adj').value > 0 ? '+' : ''}${$('es-adj').value} marche${Math.abs($('es-adj').value) > 1 ? 's' : ''}</dd>` : ''}</dl>
+    ${hors ? `<div class="note">Hors des valeurs de confort courantes (2 hauteurs + 1 giron entre 60 et 64 cm, marche de 18 cm maxi).${mode === 'sol' ? ` Pour un escalier confortable, il faudrait environ ${fmt(recReco / 100, 2)} m au sol.` : ''}</div>` : ''}
     <h3 class="sous">Béton</h3>${betonHtml(vol, num('es-dos'), num('es-sac'), $('es-gran').value)}`;
 }
 // Ouverture dans un mur : linteau (portée + appuis) et jambages coulés sur toute l'épaisseur
@@ -948,6 +965,9 @@ document.querySelectorAll('#p-treillis input, #p-treillis select').forEach(i => 
 document.querySelectorAll('#p-joints input, #p-joints select').forEach(i => i.addEventListener('input', calcJoints));
 document.querySelectorAll('#p-carreaux input').forEach(i => i.addEventListener('input', calcCarreaux));
 document.querySelectorAll('#p-escalier input, #p-escalier select').forEach(i => i.addEventListener('input', calcEscalier));
+// Longueur au sol : la longueur ou la hauteur change, on repart du nombre de marches le plus confortable
+['es-rec', 'es-h'].forEach(id => $(id).addEventListener('input', () => { $('es-adj').value = 0; calcEscalier(); }));
+[['es-moins', -1], ['es-plus', 1]].forEach(([id, d]) => $(id).addEventListener('click', () => { $('es-adj').value = (parseInt($('es-adj').value, 10) || 0) + d; calcEscalier(); saveChamps(); }));
 document.querySelectorAll('#p-ouverture input, #p-ouverture select').forEach(i => i.addEventListener('input', calcOuverture));
 document.querySelectorAll('#p-poteau input, #p-poteau select').forEach(i => i.addEventListener('input', calcPoteau));
 try { const s = localStorage.getItem('gachee-seau'); if (s) $('seau').value = s; } catch (e) {}
