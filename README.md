@@ -2,10 +2,10 @@
 
 Calculs de chantier pour maçons, sur le téléphone : combien de sacs, de seaux d'eau, de m³ ou de tonnes pour un chantier de maison individuelle.
 
-**Version 0.10.2 (prototype)** · fait avec un maçon, pour de vrais chantiers.
+**Version 0.10.3 (prototype)** · fait avec un maçon, pour de vrais chantiers.
 
 ## Ce qu'elle calcule
-- **Crépi / enduit** : sacs et eau, avec les valeurs des fiches Weber (pral F, lite HR) ou tes propres produits.
+- **Crépi / enduit** : sacs et eau, avec les valeurs des fiches Weber (pral F, weberlite F et G), ParexLanko ou tes propres produits.
 - **Colle à carrelage** : selon la taloche (6x6, 9x9, demi-lune) et le simple ou double encollage (Weber.col plus, col flex éco).
 - **Joints de carrelage** : kilos de joint selon le format du carreau, la largeur du joint et l'épaisseur (joints Edilis fin et rustic).
 - **Semelles et dalles** : béton à la bétonnière, au sable + gravier ou au mélange à béton 0/20 (recette de la fiche Lafarge).

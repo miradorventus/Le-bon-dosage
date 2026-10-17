@@ -452,7 +452,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p><strong>Le Bon Dosage</strong> est une calculatrice de maçonnerie gratuite, pensée avec un maçon pour les chantiers de maison individuelle. Elle remplace les différents calculateurs en ligne :</p>
     <ul>
       <li><strong>Calcul béton</strong> pour semelle filante ou isolée, dalle et poteau : volume en m³, sacs de ciment (35 kg), seaux de sable et de gravier ou mélange à béton 0/20, eau.</li>
-      <li><strong>Dosage crépi et enduit de façade</strong> : nombre de sacs et eau par sac (Weber.pral F, Weber.lite HR...).</li>
+      <li><strong>Dosage crépi et enduit de façade</strong> : nombre de sacs et eau par sac (Weber.pral F, weberlite F...).</li>
       <li><strong>Calcul colle carrelage</strong> selon le peigne (6x6, 9x9, demi-lune), en simple ou double encollage.</li>
       <li><strong>Calcul joint carrelage</strong> selon le format du carreau et la largeur du joint.</li>
       <li><strong>Ouverture dans un mur en pierre</strong> : béton et ferraillage du linteau et des jambages.</li>
@@ -463,7 +463,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.10.2 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.10.3 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -484,10 +484,12 @@ const PEIGNES_COURANTS = [{ l: '6 mm', s: 3, d: 4.5 }, { l: '8 mm', s: 4, d: 5.5
 const DEFAULTS = {
   crepi: [
     { id: 'def-pralf', nom: 'Weber.pral F (monocouche grain fin OC2, sac de 25 kg ; 3,7 à 4,7 L d\'eau ; 23 kg/m² en 15 mm, selon la finition)', sac: 25, eau: 4.2, conso: 1.53 },
-    { id: 'def-litehr', nom: 'Weber.lite HR allégé (monocouche allégé, sac de 25 kg ; 15 kg/m² en 15 mm ; eau indicative, à vérifier sur le sac)', sac: 25, eau: 5, conso: 1.0 },
+    // weberlite F et G (remplacent weberlite HR) : eau lue sur le sac (Point P, 17/10/2026) ; consommation indicative d'un semi-allégé
+    { id: 'def-litef', nom: 'Weberlite F (semi-allégé grain fin, sac de 25 kg ; 5 à 6 L d\'eau ; consommation indicative)', sac: 25, eau: 5.5, conso: 1.3 },
+    { id: 'def-liteg', nom: 'Weberlite G (semi-allégé grain moyen OC1, sac de 25 kg ; 5 à 6 L d\'eau ; consommation indicative)', sac: 25, eau: 5.5, conso: 1.3 },
     // Fiches techniques vendues chez Chausson (relevées le 17/10/2026) : eau = milieu de la fourchette
     { id: 'def-parexi', nom: 'ParexLanko PAREXI (monocouche lourd OC3, sac de 30 kg ; fiche : 1,6 kg/m² par mm, eau 4,5 à 5,4 L)', sac: 30, eau: 5, conso: 1.6 },
-    { id: 'def-monorex', nom: 'ParexLanko MONOREX GF (monocouche semi-allégé ; fiche : 1,3 kg/m² par mm, eau 5,2 à 6,3 L)', sac: 25, eau: 5.8, conso: 1.3 },
+    { id: 'def-monorex', nom: 'ParexLanko MONOREX GF (monocouche semi-allégé ; fiche : 1,3 kg/m² par mm, eau 5,3 à 6,3 L)', sac: 25, eau: 5.8, conso: 1.3 },
     { id: 'def-crepi', nom: 'Enduit monocouche prêt à l\'emploi (valeurs courantes)', sac: 25, eau: 5, conso: 1.4 },
     { id: 'def-chaux', nom: 'Enduit à la chaux prêt à l\'emploi (valeurs courantes)', sac: 25, eau: 5.5, conso: 1.6 }
   ],
