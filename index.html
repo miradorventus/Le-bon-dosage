@@ -196,7 +196,6 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Carreau, longueur <small>cm</small><input id="ca-a" type="number" inputmode="decimal" value="60"></label>
       <label>Carreau, largeur <small>cm</small><input id="ca-b" type="number" inputmode="decimal" value="60"></label>
       <label>Marge de coupe <small>%</small><input id="ca-marge" type="number" inputmode="decimal" value="10"></label>
-      <label>Une boîte fait <small>m², voir le carton</small><input id="ca-boite" type="number" inputmode="decimal" value="1.44"></label>
     </div>
     <div class="result" id="ca-res"></div>
     <button class="btn add-list" data-add="carreaux">Ajouter à la liste</button>
@@ -512,7 +511,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.12 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.12.1 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -744,21 +743,18 @@ function calcJoints() {
     <dt>Eau par sac</dt><dd>${fmt(parseFloat(eau), 2)} L</dd></dl>
     ${hors ? `<div class="note">Ce joint est prévu pour des largeurs ${type === 'fin' ? 'de 1 à 4 mm' : 'de 5 à 50 mm'} : choisis l'autre joint.</div>` : ''}${CHECK}`;
 }
-// Carreaux : surface + marge de coupe selon la pose, arrondi à la boîte entière
+// Carreaux : commandés au m² (le fournisseur compte les palettes) ; surface + marge de coupe selon la pose
 function calcCarreaux() {
-  const surf = num('ca-surf'), a = num('ca-a'), b = num('ca-b'), boite = num('ca-boite');
+  const surf = num('ca-surf'), a = num('ca-a'), b = num('ca-b');
   const m2 = surf * (1 + num('ca-marge') / 100);
   const unit = a * b / 10000;
   const nb = unit ? Math.ceil(m2 / unit) : 0;
-  const boites = boite ? Math.ceil(m2 / boite) : 0;
-  const parBoite = boite && unit ? Math.round(boite / unit) : 0;
   ACHATS.carreaux = { titre: `Carreaux : ${fmt(surf, 1)} m², ${fmt(a, 0)}x${fmt(b, 0)}`,
-    items: boites ? [[`Carreaux ${fmt(a, 0)}x${fmt(b, 0)}`, boites, `boîte${boites > 1 ? 's' : ''} de ${fmt(boite, 2)} m²`]] : [[`Carreaux ${fmt(a, 0)}x${fmt(b, 0)}`, nb, 'carreaux']] };
-  $('ca-res').innerHTML = `<div class="big">${boites || nb} <span>${boites ? `boîte${boites > 1 ? 's' : ''}` : 'carreaux'}</span></div>
+    items: [[`Carreaux ${fmt(a, 0)}x${fmt(b, 0)}`, r2(m2), 'm²']] };
+  $('ca-res').innerHTML = `<div class="big">${fmt(m2, 2)} <span>m² à commander</span></div>
     <dl class="rows"><dt>Carreaux</dt><dd>${nb}</dd>
-    <dt>Avec la marge</dt><dd>${fmt(m2, 2)} m²</dd>
-    ${boites ? `<dt>Dans les boîtes</dt><dd>${fmt(boites * boite, 2)} m²</dd>${parBoite ? `<dt>Par boîte</dt><dd>≈ ${parBoite} carreaux</dd>` : ''}` : ''}</dl>
-    <div class="note">Prends toutes les boîtes dans le même lot (même nuance et calibre, noté sur le carton) et garde-en une de côté pour les réparations.</div>`;
+    <dt>Dont marge de coupe</dt><dd>${fmt(m2 - surf, 2)} m²</dd></dl>
+    <div class="note">Commande tout en une fois, dans le même lot (même nuance et calibre), et garde quelques carreaux pour les réparations.</div>`;
 }
 $('ca-pose').addEventListener('change', () => { $('ca-marge').value = $('ca-pose').value; calcCarreaux(); });
 // Escalier droit coulé : marches par la règle de Blondel (2 h + g ≈ 63 cm, h ≈ 17 cm), béton = paillasse + marches
