@@ -146,6 +146,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <button role="tab" id="t-treillis" aria-selected="false" data-tab="treillis" data-cat="beton">Treillis</button>
     <button role="tab" id="t-poteau" aria-selected="false" data-tab="poteau" data-cat="beton">Poteaux</button>
     <button role="tab" id="t-ouverture" aria-selected="false" data-tab="ouverture" data-cat="beton">Ouverture</button>
+    <button role="tab" id="t-escalier" aria-selected="false" data-tab="escalier" data-cat="beton">Escalier</button>
   </nav>
 
   <label class="seau" for="seau">Mon seau fait <input id="seau" type="number" inputmode="decimal" value="10"> litres</label>
@@ -340,6 +341,37 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <button class="btn add-list" data-add="treillis">Ajouter à la liste</button>
   </section>
 
+  <!-- ESCALIER BÉTON -->
+  <section class="panel" id="p-escalier" hidden>
+    <h2>Escalier en béton</h2>
+    <div class="grid2">
+      <label>Hauteur à monter <small>cm</small><input id="es-h" type="number" inputmode="decimal" value="270"></label>
+      <label>Largeur <small>cm</small><input id="es-l" type="number" inputmode="decimal" value="90"></label>
+      <label>Épaisseur de paillasse <small>cm</small><input id="es-e" type="number" inputmode="decimal" value="12"></label>
+      <label>Marches
+        <select id="es-mode"><option value="reco">Recommandées</option><option value="perso">Mes valeurs</option></select></label>
+    </div>
+    <div id="es-perso" hidden>
+      <div class="grid2">
+        <label>Hauteur de marche <small>cm</small><input id="es-hm" type="number" inputmode="decimal" value="17"></label>
+        <label>Giron <small>cm</small><input id="es-g" type="number" inputmode="decimal" value="28"></label>
+      </div>
+      <small class="info-prod">Tes valeurs : à toi de voir si elles conviennent au chantier.</small>
+    </div>
+    <h3 class="sous">Béton</h3>
+    <div class="grid2">
+      <label>Dosage ciment <small>kg/m³</small>
+        <select id="es-dos"><option value="300">300</option><option value="350" selected>350</option><option value="400">400</option></select></label>
+      <label>Sac de ciment <small>kg</small>
+        <select id="es-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
+      <label>Granulats
+        <select id="es-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
+      <label>Marge de perte <small>%</small><input id="es-marge" type="number" inputmode="decimal" value="10"></label>
+    </div>
+    <div class="result" id="es-res"></div>
+    <button class="btn add-list" data-add="escalier">Ajouter à la liste</button>
+  </section>
+
   <!-- OUVERTURE : LINTEAU + JAMBAGES -->
   <section class="panel" id="p-ouverture" hidden>
     <h2>Ouverture : linteau et jambages</h2>
@@ -480,7 +512,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.11 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.12 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -729,6 +761,25 @@ function calcCarreaux() {
     <div class="note">Prends toutes les boîtes dans le même lot (même nuance et calibre, noté sur le carton) et garde-en une de côté pour les réparations.</div>`;
 }
 $('ca-pose').addEventListener('change', () => { $('ca-marge').value = $('ca-pose').value; calcCarreaux(); });
+// Escalier droit coulé : marches par la règle de Blondel (2 h + g ≈ 63 cm, h ≈ 17 cm), béton = paillasse + marches
+function calcEscalier() {
+  const H = num('es-h'), w = num('es-l'), e = num('es-e'), perso = $('es-mode').value === 'perso';
+  $('es-perso').hidden = !perso;
+  $('es-dos').parentElement.hidden = $('es-sac').parentElement.hidden = $('es-gran').value === 'obra';
+  const n = Math.max(1, Math.round(H / (perso ? num('es-hm') || 17 : 17)));
+  const h = H / n, g = perso ? num('es-g') : Math.round((63 - 2 * h) * 2) / 2;
+  const rec = (n - 1) * g, blondel = 2 * h + g;
+  const L = Math.hypot(rec, H);
+  const vol = (L * e * w + (n - 1) * h * g / 2 * w) / 1e6 * (1 + num('es-marge') / 100);
+  const hors = blondel < 60 || blondel > 64 || h > 18.5 || g < 24;
+  ACHATS.escalier = { titre: `Escalier : ${n} marches, ${fmt(H, 0)} cm à monter`, items: betonAchats(vol, num('es-dos'), num('es-sac'), $('es-gran').value) };
+  $('es-res').innerHTML = `<div class="big">${n} <span>marches de ${fmt(h, 1)} cm</span></div>
+    <dl class="rows"><dt>Giron</dt><dd>${fmt(g, 1)} cm</dd>
+    <dt>2 hauteurs + 1 giron</dt><dd>${fmt(blondel, 1)} cm</dd>
+    <dt>Longueur au sol</dt><dd>${fmt(rec / 100, 2)} m</dd></dl>
+    ${hors ? '<div class="note">Hors des valeurs de confort courantes (2 hauteurs + 1 giron entre 60 et 64 cm, marche de 18 cm maxi).</div>' : ''}
+    <h3 class="sous">Béton</h3>${betonHtml(vol, num('es-dos'), num('es-sac'), $('es-gran').value)}`;
+}
 // Ouverture dans un mur : linteau (portée + appuis) et jambages coulés sur toute l'épaisseur
 function calcOuverture() {
   const ha = num('ou-ha');
@@ -900,12 +951,13 @@ document.querySelectorAll('#p-mur input, #p-mur select').forEach(i => i.addEvent
 document.querySelectorAll('#p-treillis input, #p-treillis select').forEach(i => i.addEventListener('input', calcTreillis));
 document.querySelectorAll('#p-joints input, #p-joints select').forEach(i => i.addEventListener('input', calcJoints));
 document.querySelectorAll('#p-carreaux input').forEach(i => i.addEventListener('input', calcCarreaux));
+document.querySelectorAll('#p-escalier input, #p-escalier select').forEach(i => i.addEventListener('input', calcEscalier));
 document.querySelectorAll('#p-ouverture input, #p-ouverture select').forEach(i => i.addEventListener('input', calcOuverture));
 document.querySelectorAll('#p-poteau input, #p-poteau select').forEach(i => i.addEventListener('input', calcPoteau));
 try { const s = localStorage.getItem('gachee-seau'); if (s) $('seau').value = s; } catch (e) {}
 $('seau').addEventListener('input', () => {
   try { localStorage.setItem('gachee-seau', $('seau').value); } catch (e) {}
-  calcCrepi(); calcColle(); calcSemelle(); calcDalle(); calcChape(); calcMur(); calcPoteau();
+  calcCrepi(); calcColle(); calcSemelle(); calcDalle(); calcChape(); calcMur(); calcPoteau(); calcOuverture(); calcEscalier();
 });
 applyMat();
 
@@ -999,7 +1051,7 @@ try { stats = JSON.parse(localStorage.getItem('gachee-stats') || '{}'); } catch 
 function compte(key) { stats[key] = (stats[key] || 0) + 1; try { localStorage.setItem('gachee-stats', JSON.stringify(stats)); } catch (e) {} }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => compte(b.dataset.tab)));
 function texteAvis() {
-  const NOMS = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux', ouverture: 'Ouverture' };
+  const NOMS = NOMS_CALC;
   let t = `Avis sur Le Bon Dosage (${document.querySelector('footer').textContent.match(/Version [\d.]+/)?.[0] || ''}, ${new Date().toLocaleDateString('fr-FR')})\n\n${$('av-texte').value.trim() || '(pas de commentaire)'}`;
   if ($('av-stats').checked) {
     const util = Object.entries(stats).sort((a, b) => b[1] - a[1]).map(([k, n]) => `- ${NOMS[k] || k} : ouvert ${n} fois`).join('\n');
@@ -1049,7 +1101,7 @@ function remet(id) {
 }
 
 // Possibilités enregistrées : réglages d'un calcul gardés sous un nom, à rappeler plus tard
-const CALCS = { crepi: calcCrepi, colle: calcColle, carreaux: calcCarreaux, joints: calcJoints, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau, ouverture: calcOuverture };
+const CALCS = { crepi: calcCrepi, colle: calcColle, carreaux: calcCarreaux, joints: calcJoints, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau, ouverture: calcOuverture, escalier: calcEscalier };
 let poss = {};
 try { poss = JSON.parse(localStorage.getItem('gachee-possibilites') || '{}'); } catch (e) { poss = {}; }
 const savePoss = () => { try { localStorage.setItem('gachee-possibilites', JSON.stringify(poss)); } catch (e) {} };
@@ -1060,7 +1112,7 @@ function renderPoss(key) {
   $('poss-del-' + key).hidden = true;
   renderGestion();
 }
-const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', carreaux: 'Carreaux', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux', ouverture: 'Ouverture' };
+const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', carreaux: 'Carreaux', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux', ouverture: 'Ouverture', escalier: 'Escalier' };
 function renderGestion() {
   const rows = [];
   Object.keys(NOMS_CALC).forEach(k => (poss[k] || []).forEach((x, i) => rows.push(`<li><span>${esc(x.nom)}<small>${NOMS_CALC[k]}</small></span><button data-gk="${k}" data-gi="${i}">Supprimer</button></li>`)));
@@ -1118,9 +1170,9 @@ applyProduct('crepi'); applyProduct('colle');
 CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
 try { const o = localStorage.getItem('gachee-onglet'); const b = o && document.querySelector(`.tabs button[data-tab="${o}"]`); if (b) b.click(); } catch (e) {}
 montreCat(document.querySelector('.tabs button[aria-selected="true"]').dataset.cat);
-calcCrepi(); calcColle(); calcCarreaux(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau(); calcOuverture();
+calcCrepi(); calcColle(); calcCarreaux(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau(); calcOuverture(); calcEscalier();
 renderListe();
-const SEL_INFO = ['crepi-prod', 'colle-prod', 'jo-prod', 'mur-mortier', 'sem-gran', 'dal-gran', 'po-gran', 'ou-gran'];
+const SEL_INFO = ['crepi-prod', 'colle-prod', 'jo-prod', 'mur-mortier', 'sem-gran', 'dal-gran', 'po-gran', 'ou-gran', 'es-gran'];
 SEL_INFO.forEach(id => { $(id).addEventListener('change', () => majInfo($(id))); $(id).addEventListener('input', () => majInfo($(id))); majInfo($(id)); });
 try { const v = localStorage.getItem('gachee-vue'); if (v && $('v-' + v)) vue(v); } catch (e) {}
 demarre = true;
