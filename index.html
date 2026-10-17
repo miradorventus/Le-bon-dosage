@@ -122,6 +122,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <nav class="tabs" role="tablist">
     <button role="tab" id="t-crepi" aria-selected="true" data-tab="crepi">Crépi</button>
     <button role="tab" id="t-colle" aria-selected="false" data-tab="colle">Colle</button>
+    <button role="tab" id="t-joints" aria-selected="false" data-tab="joints">Joints</button>
     <button role="tab" id="t-semelle" aria-selected="false" data-tab="semelle">Semelle</button>
     <button role="tab" id="t-dalle" aria-selected="false" data-tab="dalle">Dalle</button>
     <button role="tab" id="t-chape" aria-selected="false" data-tab="chape">Chape</button>
@@ -165,6 +166,27 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     </div>
     <div class="result" id="colle-res"></div>
     <button class="btn add-list" data-add="colle">Ajouter à la liste</button>
+  </section>
+
+  <!-- JOINTS DE CARRELAGE -->
+  <section class="panel" id="p-joints" hidden>
+    <h2>Joints de carrelage</h2>
+    <label>Produit
+      <select id="jo-prod">
+        <option value="20|6.6|fin">Edilis Joint fin, 1 à 4 mm, sac 20 kg (fiche : eau 6,4 à 6,8 L)</option>
+        <option value="25|3.45|rustic">Edilis Joint rustic, 5 à 50 mm, sac 25 kg (fiche : eau 3,2 à 3,7 L)</option>
+        <option value="5|1.65|fin">Edilis Joint fin, 1 à 4 mm, seau 5 kg (fiche : eau 1,6 à 1,7 L)</option>
+      </select></label>
+    <div class="grid2">
+      <label>Surface <small>m²</small><input id="jo-surf" type="number" inputmode="decimal" value="20"></label>
+      <label>Largeur du joint <small>mm</small><input id="jo-larg" type="number" inputmode="decimal" value="3"></label>
+      <label>Carreau, longueur <small>cm</small><input id="jo-a" type="number" inputmode="decimal" value="60"></label>
+      <label>Carreau, largeur <small>cm</small><input id="jo-b" type="number" inputmode="decimal" value="60"></label>
+      <label>Épaisseur du carreau <small>mm</small><input id="jo-ep" type="number" inputmode="decimal" value="9"></label>
+      <label>Marge de perte <small>%</small><input id="jo-marge" type="number" inputmode="decimal" value="10"></label>
+    </div>
+    <div class="result" id="jo-res"></div>
+    <button class="btn add-list" data-add="joints">Ajouter à la liste</button>
   </section>
 
   <!-- SEMELLE -->
@@ -385,6 +407,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <li><strong>Calcul béton</strong> pour semelle filante ou isolée, dalle et poteau : volume en m³, sacs de ciment (35 kg), seaux de sable et de gravier ou mélange à béton 0/20, eau.</li>
       <li><strong>Dosage crépi et enduit de façade</strong> : nombre de sacs et eau par sac (Weber.pral F, Weber.lite HR...).</li>
       <li><strong>Calcul colle carrelage</strong> selon le peigne (6x6, 9x9, demi-lune), en simple ou double encollage.</li>
+      <li><strong>Calcul joint carrelage</strong> selon le format du carreau et la largeur du joint.</li>
       <li><strong>Calcul chape</strong> à la bétonnière ou en m³ à commander à la toupie.</li>
       <li><strong>Nombre de parpaings et briques</strong> et mortier de montage.</li>
       <li><strong>Treillis soudé</strong> (PAF, ST 25 C...), <strong>ferraillage des poteaux et chaînages</strong>, <strong>castine, sable, gravier</strong> en tonnes.</li>
@@ -595,6 +618,23 @@ function calcMur() {
     <dt>Eau par sac</dt><dd>${eauTxt(sac * 0.49)}</dd></dl>
     <div class="note">${colle ? 'Briques rectifiées collées : utilise plutôt le mortier-colle du fabricant (voir le sac).' : 'Compte à part les blocs d\'angle, les demi-blocs et les linteaux.'}</div>`;
 }
+// Joints : formule courante des fabricants, kg/m² = (A + B) / (A x B) x largeur x profondeur x densité (mm, densité 1,7)
+function calcJoints() {
+  const [sac, eau, type] = $('jo-prod').value.split('|');
+  const A = num('jo-a') * 10, B = num('jo-b') * 10, C = num('jo-larg'), D = num('jo-ep');
+  const conso = A && B ? (A + B) / (A * B) * C * D * 1.7 : 0;
+  const kg = num('jo-surf') * conso * (1 + num('jo-marge') / 100);
+  const sacs = Math.max(1, Math.ceil(kg / parseFloat(sac)));
+  const nom = $('jo-prod').selectedOptions[0].textContent.split(' (')[0];
+  const unite = parseFloat(sac) === 5 ? `seau${sacs > 1 ? 'x' : ''} de 5 kg` : `sac${sacs > 1 ? 's' : ''} de ${sac} kg`;
+  ACHATS.joints = { titre: `Joints : ${fmt(num('jo-surf'), 1)} m², carreau ${fmt(num('jo-a'), 0)}x${fmt(num('jo-b'), 0)}`, items: [[nom, sacs, unite]] };
+  const hors = type === 'fin' ? C > 4 : C < 5;
+  $('jo-res').innerHTML = `<div class="big">${sacs} <span>${unite}</span></div>
+    <dl class="rows"><dt>Consommation</dt><dd>${fmt(conso, 2)} kg/m²</dd>
+    <dt>Poids total</dt><dd>${fmt(kg, 1)} kg</dd>
+    <dt>Eau par sac</dt><dd>${fmt(parseFloat(eau), 2)} L</dd></dl>
+    ${hors ? `<div class="note">Ce joint est prévu pour des largeurs ${type === 'fin' ? 'de 1 à 4 mm' : 'de 5 à 50 mm'} : choisis l'autre joint.</div>` : ''}${CHECK}`;
+}
 function calcTreillis() {
   const L = num('tr-l'), W = num('tr-w'), r = num('tr-rec') / 100;
   const t = TREILLIS[num('tr-pan')] || TREILLIS[6];
@@ -699,7 +739,7 @@ $('np-list').addEventListener('click', e => {
 
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
-  ['crepi', 'colle', 'semelle', 'dalle', 'chape', 'granulats', 'mur', 'treillis', 'poteau'].forEach(t => $('p-' + t).hidden = t !== b.dataset.tab);
+  ['crepi', 'colle', 'joints', 'semelle', 'dalle', 'chape', 'granulats', 'mur', 'treillis', 'poteau'].forEach(t => $('p-' + t).hidden = t !== b.dataset.tab);
   try { localStorage.setItem('gachee-onglet', b.dataset.tab); } catch (e) {}
   if (demarre) $('p-' + b.dataset.tab).scrollIntoView({ behavior: 'smooth', block: 'start' });
 }));
@@ -722,6 +762,7 @@ $('gr-mat').addEventListener('change', () => { applyMat(); calcGranulats(); });
 document.querySelectorAll('#p-granulats input').forEach(i => i.addEventListener('input', calcGranulats));
 document.querySelectorAll('#p-mur input, #p-mur select').forEach(i => i.addEventListener('input', calcMur));
 document.querySelectorAll('#p-treillis input, #p-treillis select').forEach(i => i.addEventListener('input', calcTreillis));
+document.querySelectorAll('#p-joints input, #p-joints select').forEach(i => i.addEventListener('input', calcJoints));
 document.querySelectorAll('#p-poteau input, #p-poteau select').forEach(i => i.addEventListener('input', calcPoteau));
 try { const s = localStorage.getItem('gachee-seau'); if (s) $('seau').value = s; } catch (e) {}
 $('seau').addEventListener('input', () => {
@@ -820,7 +861,7 @@ try { stats = JSON.parse(localStorage.getItem('gachee-stats') || '{}'); } catch 
 function compte(key) { stats[key] = (stats[key] || 0) + 1; try { localStorage.setItem('gachee-stats', JSON.stringify(stats)); } catch (e) {} }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => compte(b.dataset.tab)));
 function texteAvis() {
-  const NOMS = { crepi: 'Crépi', colle: 'Colle', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
+  const NOMS = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
   let t = `Avis sur Le Bon Dosage (${document.querySelector('footer').textContent.match(/Version [\d.]+/)?.[0] || ''}, ${new Date().toLocaleDateString('fr-FR')})\n\n${$('av-texte').value.trim() || '(pas de commentaire)'}`;
   if ($('av-stats').checked) {
     const util = Object.entries(stats).sort((a, b) => b[1] - a[1]).map(([k, n]) => `- ${NOMS[k] || k} : ouvert ${n} fois`).join('\n');
@@ -870,7 +911,7 @@ function remet(id) {
 }
 
 // Possibilités enregistrées : réglages d'un calcul gardés sous un nom, à rappeler plus tard
-const CALCS = { crepi: calcCrepi, colle: calcColle, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau };
+const CALCS = { crepi: calcCrepi, colle: calcColle, joints: calcJoints, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau };
 let poss = {};
 try { poss = JSON.parse(localStorage.getItem('gachee-possibilites') || '{}'); } catch (e) { poss = {}; }
 const savePoss = () => { try { localStorage.setItem('gachee-possibilites', JSON.stringify(poss)); } catch (e) {} };
@@ -881,7 +922,7 @@ function renderPoss(key) {
   $('poss-del-' + key).hidden = true;
   renderGestion();
 }
-const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
+const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
 function renderGestion() {
   const rows = [];
   Object.keys(NOMS_CALC).forEach(k => (poss[k] || []).forEach((x, i) => rows.push(`<li><span>${esc(x.nom)}<small>${NOMS_CALC[k]}</small></span><button data-gk="${k}" data-gi="${i}">Supprimer</button></li>`)));
@@ -938,7 +979,7 @@ remet('crepi-prod'); remet('colle-prod');
 applyProduct('crepi'); applyProduct('colle');
 CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
 try { const o = localStorage.getItem('gachee-onglet'); const b = o && document.querySelector(`.tabs button[data-tab="${o}"]`); if (b) b.click(); } catch (e) {}
-calcCrepi(); calcColle(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau();
+calcCrepi(); calcColle(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau();
 renderListe();
 try { const v = localStorage.getItem('gachee-vue'); if (v && $('v-' + v)) vue(v); } catch (e) {}
 demarre = true;
