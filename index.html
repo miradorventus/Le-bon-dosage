@@ -1,0 +1,806 @@
+<title>Le Bon Dosage</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bon Dosage">
+<meta name="theme-color" content="#1f5fa8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: une colonne type carnet de chantier, onglets en haut, gros champs, résultat en encadré "cordeau bleu" */
+:root {
+  --bg: #eceae6;        /* gris ciment clair */
+  --surface: #ffffff;
+  --fg: #1f2326;
+  --muted: #5d6468;
+  --line: #c9c6bf;
+  --accent: #1f5fa8;    /* bleu cordeau à tracer */
+  --accent-fg: #ffffff;
+  --warn-bg: #fff3cd;
+  --warn-fg: #6b4e00;
+  --f-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Barlow", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1a1c1e; --surface: #25282b; --fg: #eceae6; --muted: #a3a9ad; --line: #3a3e42;
+  --accent: #6fa8e8; --accent-fg: #0d1a29; --warn-bg: #3a3014; --warn-fg: #f2d68a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1a1c1e; --surface: #25282b; --fg: #eceae6; --muted: #a3a9ad; --line: #3a3e42;
+  --accent: #6fa8e8; --accent-fg: #0d1a29; --warn-bg: #3a3014; --warn-fg: #f2d68a; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 17px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px }
+.wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px }
+header h1 { font-family: var(--f-display); font-size: 2.2rem; margin: 0; letter-spacing: .02em; line-height: 1 }
+header p { margin: 4px 0 0; color: var(--muted); font-size: .95rem }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px }
+.seau { display: flex; align-items: center; gap: 10px; font-weight: 600 }
+.seau input { width: 5.5em }
+.tabs button { font-family: var(--f-display); font-size: 1.1rem; letter-spacing: .03em; text-transform: uppercase;
+  padding: 12px 4px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 6px; cursor: pointer }
+.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg) }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 14px }
+.panel h2 { font-family: var(--f-display); font-size: 1.5rem; margin: 0 }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: .9rem; min-width: 0 }
+label small { font-weight: 400; color: var(--muted) }
+input, select { font: inherit; font-size: 1.15rem; padding: 10px 12px; border: 2px solid var(--line); border-radius: 6px;
+  background: var(--bg); color: var(--fg); width: 100%; font-variant-numeric: tabular-nums }
+.result { border: 2px solid var(--accent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px }
+.result .big { font-family: var(--f-display); font-size: 2.4rem; line-height: 1; color: var(--accent) }
+.result .big span { font-size: 1.2rem; color: var(--fg) }
+.rows { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-variant-numeric: tabular-nums }
+.rows dt { color: var(--muted) } .rows dd { margin: 0; font-weight: 600; text-align: right }
+.note { background: var(--warn-bg); color: var(--warn-fg); border-radius: 6px; padding: 10px 12px; font-size: .9rem }
+.btn { font: inherit; font-weight: 600; padding: 12px 14px; border-radius: 6px; border: 2px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer }
+.btn.solid { background: var(--accent); color: var(--accent-fg) }
+.add-list, .save-poss { align-self: flex-start }
+.poss { display: flex; gap: 8px; align-items: center }
+.poss select { flex: 1; min-width: 0; font-size: 1rem }
+.poss button { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: none; color: var(--muted); border-radius: 4px; padding: 8px 10px; cursor: pointer }
+.li-actions { display: flex; gap: 8px; flex-wrap: wrap }
+#liste h3 { font-family: var(--f-display); font-size: 1.2rem; margin: 4px 0 0 }
+#li-copie { white-space: pre-wrap; user-select: all; background: var(--bg); border-radius: 6px; padding: 10px; font-size: .9rem; margin: 0 }
+.prodlist { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none }
+.prodlist li { display: flex; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid var(--line); padding-top: 8px }
+.prodlist li span { min-width: 0 }
+.prodlist small { color: var(--muted); display: block }
+.prodlist button { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: none; color: var(--muted); border-radius: 4px; padding: 6px 10px; cursor: pointer }
+footer { color: var(--muted); font-size: .85rem }
+@media (max-width: 380px) { .grid2 { grid-template-columns: 1fr } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Le Bon Dosage</h1>
+    <p>Calculs de chantier pour le maçon. Rien ne quitte ce téléphone.</p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="t-crepi" aria-selected="true" data-tab="crepi">Crépi</button>
+    <button role="tab" id="t-colle" aria-selected="false" data-tab="colle">Colle</button>
+    <button role="tab" id="t-semelle" aria-selected="false" data-tab="semelle">Semelle</button>
+    <button role="tab" id="t-dalle" aria-selected="false" data-tab="dalle">Dalle</button>
+    <button role="tab" id="t-chape" aria-selected="false" data-tab="chape">Chape</button>
+    <button role="tab" id="t-granulats" aria-selected="false" data-tab="granulats">Granulats</button>
+    <button role="tab" id="t-mur" aria-selected="false" data-tab="mur">Parpaings</button>
+    <button role="tab" id="t-treillis" aria-selected="false" data-tab="treillis">Treillis</button>
+    <button role="tab" id="t-poteau" aria-selected="false" data-tab="poteau">Poteaux</button>
+  </nav>
+
+  <label class="seau" for="seau">Mon seau fait <input id="seau" type="number" inputmode="decimal" value="10"> litres</label>
+
+  <!-- CRÉPI -->
+  <section class="panel" id="p-crepi">
+    <h2>Crépi / enduit de façade</h2>
+    <label>Produit <select id="crepi-prod"></select></label>
+    <div class="grid2">
+      <label>Surface <small>m²</small><input id="crepi-surf" type="number" inputmode="decimal" value="45"></label>
+      <label>Épaisseur <small>mm</small><input id="crepi-ep" type="number" inputmode="decimal" value="15"></label>
+      <label>Consommation <small>kg/m² par mm</small><input id="crepi-conso" type="number" inputmode="decimal" step="0.1"></label>
+      <label>Sac <small>kg</small><input id="crepi-sac" type="number" inputmode="decimal"></label>
+      <label>Eau par sac <small>litres</small><input id="crepi-eau" type="number" inputmode="decimal" step="0.1"></label>
+      <label>Marge de perte <small>%</small><input id="crepi-marge" type="number" inputmode="decimal" value="10"></label>
+    </div>
+    <div class="result" id="crepi-res"></div>
+    <button class="btn add-list" data-add="crepi">Ajouter à la liste</button>
+  </section>
+
+  <!-- COLLE -->
+  <section class="panel" id="p-colle" hidden>
+    <h2>Colle à carrelage</h2>
+    <label>Produit <select id="colle-prod"></select></label>
+    <div class="grid2">
+      <label>Surface <small>m²</small><input id="colle-surf" type="number" inputmode="decimal" value="20"></label>
+      <label>Peigne <small>selon le carreau</small>
+        <select id="colle-peigne"></select></label>
+      <label>Double encollage <small>grand format, extérieur</small>
+        <select id="colle-double"><option value="0">Non</option><option value="1">Oui</option></select></label>
+      <label>Sac <small>kg</small><input id="colle-sac" type="number" inputmode="decimal"></label>
+      <label>Eau par sac <small>litres</small><input id="colle-eau" type="number" inputmode="decimal" step="0.1"></label>
+      <label>Marge de perte <small>%</small><input id="colle-marge" type="number" inputmode="decimal" value="10"></label>
+    </div>
+    <div class="result" id="colle-res"></div>
+    <button class="btn add-list" data-add="colle">Ajouter à la liste</button>
+  </section>
+
+  <!-- SEMELLE -->
+  <section class="panel" id="p-semelle" hidden>
+    <h2>Semelle en béton</h2>
+    <label>Type
+      <select id="sem-type"><option value="filante">Filante (sous un mur)</option><option value="isolee">Isolée (sous un poteau)</option></select></label>
+    <div class="grid2">
+      <label id="sem-l-lab">Longueur totale <small>m</small><input id="sem-l" type="number" inputmode="decimal" value="32"></label>
+      <label>Largeur <small>cm</small><input id="sem-w" type="number" inputmode="decimal" value="50"></label>
+      <label>Hauteur <small>cm</small><input id="sem-h" type="number" inputmode="decimal" value="35"></label>
+      <label id="sem-n-lab" hidden>Nombre de semelles<input id="sem-n" type="number" inputmode="numeric" value="4"></label>
+      <label>Dosage ciment <small>kg/m³</small>
+        <select id="sem-dos"><option value="300">300</option><option value="350" selected>350</option><option value="400">400</option></select></label>
+      <label>Sac de ciment <small>kg</small>
+        <select id="sem-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
+      <label>Granulats
+        <select id="sem-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option></select></label>
+      <label>Marge de perte <small>%</small><input id="sem-marge" type="number" inputmode="decimal" value="10"></label>
+    </div>
+    <div class="result" id="sem-res"></div>
+    <button class="btn add-list" data-add="semelle">Ajouter à la liste</button>
+  </section>
+
+  <!-- DALLE -->
+  <section class="panel" id="p-dalle" hidden>
+    <h2>Dalle en béton</h2>
+    <div class="grid2">
+      <label>Surface <small>m²</small><input id="dal-surf" type="number" inputmode="decimal" value="12"></label>
+      <label>Épaisseur <small>cm</small><input id="dal-ep" type="number" inputmode="decimal" value="12"></label>
+      <label>Dosage ciment <small>kg/m³</small>
+        <select id="dal-dos"><option value="300">300</option><option value="350" selected>350</option><option value="400">400</option></select></label>
+      <label>Sac de ciment <small>kg</small>
+        <select id="dal-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
+      <label>Granulats
+        <select id="dal-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option></select></label>
+      <label>Marge de perte <small>%</small><input id="dal-marge" type="number" inputmode="decimal" value="10"></label>
+    </div>
+    <div class="result" id="dal-res"></div>
+    <button class="btn add-list" data-add="dalle">Ajouter à la liste</button>
+  </section>
+
+  <!-- CHAPE -->
+  <section class="panel" id="p-chape" hidden>
+    <h2>Chape</h2>
+    <div class="grid2">
+      <label>Fabrication
+        <select id="chape-mode"><option value="betonniere">Bétonnière (sacs)</option><option value="toupie">Toupie (m³)</option></select></label>
+      <label>Dosage ciment <small>kg/m³</small>
+        <select id="chape-dos"><option value="250">250</option><option value="300">300</option><option value="350" selected>350</option></select></label>
+      <label>Sac de ciment <small>kg</small>
+        <select id="chape-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
+      <label>Surface <small>m²</small><input id="chape-surf" type="number" inputmode="decimal" value="60"></label>
+      <label>Épaisseur <small>cm</small><input id="chape-ep" type="number" inputmode="decimal" value="5"></label>
+      <label>Marge de perte <small>%</small><input id="chape-marge" type="number" inputmode="decimal" value="5"></label>
+    </div>
+    <div class="result" id="chape-res"></div>
+    <button class="btn add-list" data-add="chape">Ajouter à la liste</button>
+  </section>
+
+  <!-- GRANULATS -->
+  <section class="panel" id="p-granulats" hidden>
+    <h2>Granulats en vrac</h2>
+    <label>Matériau
+      <select id="gr-mat">
+        <option value="castine">Castine 0/31,5 (calcaire concassé)</option>
+        <option value="tv">Tout-venant 0/80 (remblai)</option>
+        <option value="mel">Mélange à béton 0/20</option>
+        <option value="sable">Sable 0/4</option>
+        <option value="gravier">Gravier roulé 5/15</option>
+        <option value="deco">Gravier décoratif 6/10</option>
+      </select></label>
+    <div class="grid2">
+      <label>Surface <small>m²</small><input id="gr-surf" type="number" inputmode="decimal" value="40"></label>
+      <label>Épaisseur finie <small>cm</small><input id="gr-ep" type="number" inputmode="decimal" value="15"></label>
+      <label>Densité <small>tonnes par m³</small><input id="gr-dens" type="number" inputmode="decimal" step="0.1"></label>
+      <label>Tassement + perte <small>%</small><input id="gr-tass" type="number" inputmode="decimal"></label>
+    </div>
+    <div class="result" id="gr-res"></div>
+    <button class="btn add-list" data-add="granulats">Ajouter à la liste</button>
+  </section>
+
+  <!-- PARPAINGS -->
+  <section class="panel" id="p-mur" hidden>
+    <h2>Montage de parpaings ou briques</h2>
+    <label>Bloc
+      <select id="mur-bloc">
+        <option value="10|20">Parpaing 50x20, ép. 20 cm</option>
+        <option value="10|15">Parpaing 50x20, ép. 15 cm</option>
+        <option value="10|10">Parpaing 50x20, ép. 10 cm</option>
+        <option value="10|20b">Brique 50x20 (collée ou mortier)</option>
+        <option value="8|20">Bloc 50x25, ép. 20 cm</option>
+      </select></label>
+    <div class="grid2">
+      <label>Longueur de mur <small>m</small><input id="mur-l" type="number" inputmode="decimal" value="24"></label>
+      <label>Hauteur <small>m</small><input id="mur-h" type="number" inputmode="decimal" value="2.5"></label>
+      <label>Ouvertures à déduire <small>m² (portes, fenêtres)</small><input id="mur-ouv" type="number" inputmode="decimal" value="6"></label>
+      <label>Sac de ciment <small>kg</small>
+        <select id="mur-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
+      <label>Marge de casse <small>%</small><input id="mur-marge" type="number" inputmode="decimal" value="5"></label>
+    </div>
+    <div class="result" id="mur-res"></div>
+    <button class="btn add-list" data-add="mur">Ajouter à la liste</button>
+  </section>
+
+  <!-- TREILLIS -->
+  <section class="panel" id="p-treillis" hidden>
+    <h2>Treillis soudé pour dalle</h2>
+    <div class="grid2">
+      <label>Longueur de dalle <small>m</small><input id="tr-l" type="number" inputmode="decimal" value="5"></label>
+      <label>Largeur de dalle <small>m</small><input id="tr-w" type="number" inputmode="decimal" value="4"></label>
+      <label>Référence de treillis
+        <select id="tr-pan"></select></label>
+      <label>Recouvrement <small>cm</small><input id="tr-rec" type="number" inputmode="decimal" value="20"></label>
+    </div>
+    <div class="result" id="tr-res"></div>
+    <button class="btn add-list" data-add="treillis">Ajouter à la liste</button>
+  </section>
+
+  <!-- POTEAUX / CHAÎNAGES -->
+  <section class="panel" id="p-poteau" hidden>
+    <h2>Poteaux, chaînages, linteaux</h2>
+    <div class="grid2">
+      <label>Section <small>cm</small>
+        <select id="po-sec"><option value="10">10 x 10</option><option value="15" selected>15 x 15</option><option value="20">20 x 20</option><option value="25">25 x 25</option></select></label>
+      <label>Aciers filants
+        <select id="po-ha"><option value="6">4 HA 6 (petits travaux)</option><option value="8">4 HA 8 (petits travaux)</option><option value="10" selected>4 HA 10</option><option value="12">4 HA 12</option></select></label>
+      <label>Longueur totale <small>m (tous poteaux ou chaînages)</small><input id="po-l" type="number" inputmode="decimal" value="30"></label>
+      <label>Nombre de morceaux <small>poteaux ou longueurs droites</small><input id="po-n" type="number" inputmode="numeric" value="4"></label>
+      <label>Recouvrement des cages <small>cm</small><input id="po-rec" type="number" inputmode="decimal" value="50"></label>
+      <label>Sac de ciment <small>kg</small>
+        <select id="po-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
+    </div>
+    <div class="result" id="po-res"></div>
+    <button class="btn add-list" data-add="poteau">Ajouter à la liste</button>
+  </section>
+
+  <!-- LISTE DE COURSES -->
+  <section class="panel" id="liste">
+    <h2>Ma liste de courses</h2>
+    <p id="li-vide" style="margin:0;color:var(--muted);font-size:.95rem">Appuie sur « Ajouter à la liste » sous un résultat : les quantités s'additionnent ici pour tout le chantier.</p>
+    <ul class="prodlist" id="li-calculs"></ul>
+    <div id="li-total"></div>
+    <div class="li-actions" id="li-actions"><button class="btn solid" id="li-partager">Envoyer la liste</button><button class="btn" id="li-copier">Copier la liste</button><button class="btn" id="li-vider">Vider la liste</button></div>
+    <p id="li-msg" style="margin:0;font-size:.9rem;color:var(--muted)" hidden></p>
+    <pre id="li-copie" hidden></pre>
+  </section>
+
+  <!-- GESTION DES ENREGISTREMENTS -->
+  <section class="panel" id="gestion">
+    <h2>Mes enregistrements</h2>
+    <p id="ge-vide" style="margin:0;color:var(--muted);font-size:.95rem">Aucune possibilité enregistrée. Utilise « Enregistrer cette possibilité » sous un résultat.</p>
+    <ul class="prodlist" id="ge-list"></ul>
+    <div class="li-actions" id="ge-actions"><button class="btn" id="ge-tout">Tout effacer</button></div>
+  </section>
+
+  <!-- SAUVEGARDE -->
+  <section class="panel" id="sauvegarde">
+    <h2>Sauvegarde</h2>
+    <p style="margin:0;color:var(--muted);font-size:.95rem">Tes produits, ta liste et tes possibilités restent sur ce téléphone. Pour ne rien perdre (changement de téléphone, appli supprimée), envoie-les dans une note.</p>
+    <button class="btn solid" id="sv-envoyer" style="align-self:flex-start">Sauvegarder dans Notes</button>
+    <p id="sv-msg" style="margin:0;font-size:.9rem;color:var(--muted)" hidden></p>
+    <pre id="sv-texte" hidden style="white-space:pre-wrap;word-break:break-all;user-select:all;background:var(--bg);border-radius:6px;padding:10px;font-size:.75rem;margin:0;max-height:10em;overflow:auto"></pre>
+    <label>Restaurer une sauvegarde <small>colle ici le texte de ta note</small>
+      <textarea id="sv-coller" rows="3" style="font:inherit;font-size:.9rem;padding:10px 12px;border:2px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);width:100%"></textarea></label>
+    <button class="btn" id="sv-restaurer" style="align-self:flex-start">Restaurer</button>
+    <p id="sv-res-msg" style="margin:0;font-size:.9rem;color:var(--muted)" hidden></p>
+  </section>
+
+  <!-- AVIS -->
+  <section class="panel" id="avis">
+    <h2>Donner mon avis</h2>
+    <p style="margin:0;color:var(--muted);font-size:.95rem">Aide à améliorer l'appli. Rien n'est envoyé tout seul : tu vois le message avant, et c'est toi qui choisis à qui l'envoyer.</p>
+    <label>Ce qui manque, ce qui est faux ou pas pratique
+      <textarea id="av-texte" rows="3" style="font:inherit;font-size:.95rem;padding:10px 12px;border:2px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);width:100%"></textarea></label>
+    <label style="flex-direction:row;align-items:center;gap:10px;font-weight:500"><input type="checkbox" id="av-stats" checked style="width:auto"> Joindre les calculs que j'utilise le plus et mes produits</label>
+    <button class="btn" id="av-voir" style="align-self:flex-start">Voir le message</button>
+    <pre id="av-apercu" hidden style="white-space:pre-wrap;background:var(--bg);border-radius:6px;padding:10px;font-size:.85rem;margin:0"></pre>
+    <button class="btn solid" id="av-envoyer" style="align-self:flex-start" hidden>Envoyer mon avis</button>
+    <p id="av-msg" style="margin:0;font-size:.9rem;color:var(--muted)" hidden></p>
+  </section>
+
+  <!-- MES PRODUITS -->
+  <section class="panel">
+    <h2>Mes produits</h2>
+    <p style="margin:0;color:var(--muted);font-size:.95rem">Recopie ce qui est écrit sur le sac. Le produit apparaîtra dans la liste du calcul.</p>
+    <div class="grid2">
+      <label>Nom <small>marque + produit</small><input id="np-nom" type="text" placeholder="ex. Weber.pral M"></label>
+      <label>Type <select id="np-type"><option value="crepi">Crépi / enduit</option><option value="colle">Colle à carrelage</option></select></label>
+      <label>Sac <small>kg</small><input id="np-sac" type="number" inputmode="decimal" value="25"></label>
+      <label>Eau par sac <small>litres</small><input id="np-eau" type="number" inputmode="decimal" step="0.1"></label>
+      <label id="np-conso-lab">Consommation <small>kg/m² par mm</small><input id="np-conso" type="number" inputmode="decimal" step="0.1"></label>
+    </div>
+    <button class="btn solid" id="np-add">Enregistrer le produit</button>
+    <p id="np-msg" style="margin:0;font-size:.9rem;color:var(--muted)" hidden></p>
+    <ul class="prodlist" id="np-list"></ul>
+  </section>
+
+  <footer>Version 0.8 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Aucune donnée ne quitte ce téléphone.</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = id => { const v = parseFloat(String($(id).value).replace(',', '.')); return isFinite(v) ? v : 0; };
+const fmt = (v, d = 1) => v.toLocaleString('fr-FR', { maximumFractionDigits: d });
+const CHECK = '<div class="note">Vérifie les indications de l\'emballage : consommation et eau changent selon la marque.</div>';
+
+// Valeurs génériques (indicatives) en attendant les fiches techniques des fabricants
+const PEIGNES_COURANTS = [{ l: '6 mm', s: 3, d: 4.5 }, { l: '8 mm', s: 4, d: 5.5 }, { l: '10 mm', s: 5, d: 6.5 }, { l: '12 mm', s: 6, d: 7.5 }];
+const DEFAULTS = {
+  crepi: [
+    { id: 'def-pralf', nom: 'Weber.pral F (fiche : 22 à 28 kg/m² en 15 mm ; eau : voir le sac)', sac: 25, eau: 5, conso: 1.7 },
+    { id: 'def-litehr', nom: 'Weber.lite HR allégé (fiche : 15 kg/m² en 15 mm ; eau : voir le sac)', sac: 25, eau: 5, conso: 1.0 },
+    { id: 'def-crepi', nom: 'Enduit monocouche prêt à l\'emploi (valeurs courantes)', sac: 25, eau: 5, conso: 1.4 },
+    { id: 'def-chaux', nom: 'Enduit à la chaux prêt à l\'emploi (valeurs courantes)', sac: 25, eau: 5.5, conso: 1.6 }
+  ],
+  colle: [
+    // Valeurs des fiches techniques Weber (2021) : consommation simple / double encollage en kg/m²
+    { id: 'def-colplus', nom: 'Weber.col plus (fiche fabricant)', sac: 25, eau: 6.4, peignes: [
+      { l: '6x6 mm, carreau ≤ 500 cm²', s: 3.5, d: 5 }, { l: '9x9 mm, carreau > 500 cm²', s: 4.5, d: 6 }, { l: 'Demi-lune 20x8, carreau > 500 cm²', s: 5.5, d: 7 }] },
+    { id: 'def-colflexeco', nom: 'Weber.col flex éco (fiche fabricant)', sac: 25, eau: 6.4, peignes: [
+      { l: '6x6 mm, carreau ≤ 500 cm²', s: 3, d: 4.5 }, { l: '9x9 mm, carreau > 500 cm²', s: 4, d: 5.5 }, { l: 'Demi-lune 20x8, carreau > 500 cm²', s: 5, d: 6.5 }] },
+    { id: 'def-colle', nom: 'Colle ciment C2 (valeurs courantes)', sac: 25, eau: 6 }
+  ]
+};
+
+let produits = [];
+try { produits = JSON.parse(localStorage.getItem('gachee-produits') || '[]'); } catch (e) { produits = []; }
+const save = () => { try { localStorage.setItem('gachee-produits', JSON.stringify(produits)); } catch (e) {} };
+
+function fillSelect(type) {
+  const sel = $(type + '-prod'); const cur = sel.value;
+  const list = [...produits.filter(p => p.type === type), ...DEFAULTS[type]];
+  sel.innerHTML = list.map(p => `<option value="${p.id}">${p.nom.replace(/</g, '&lt;')}</option>`).join('');
+  if (list.some(p => p.id === cur)) sel.value = cur;
+}
+function current(type) {
+  const id = $(type + '-prod').value;
+  return [...produits, ...DEFAULTS[type]].find(x => x.id === id) || DEFAULTS[type][0];
+}
+function applyProduct(type) {
+  const p = current(type);
+  $(type + '-sac').value = p.sac; $(type + '-eau').value = p.eau;
+  if (type === 'colle') {
+    const pg = p.peignes || PEIGNES_COURANTS;
+    $('colle-peigne').innerHTML = pg.map((x, i) => `<option value="${i}">${x.l}</option>`).join('');
+    $('colle-peigne').value = pg.length > 3 ? 1 : 0;
+  }
+  if (type === 'crepi') $('crepi-conso').value = p.conso;
+}
+
+function calcCrepi() {
+  const kg = num('crepi-surf') * num('crepi-ep') * num('crepi-conso') * (1 + num('crepi-marge') / 100);
+  const sac = num('crepi-sac') || 1;
+  const sacs = Math.ceil(kg / sac);
+  ACHATS.crepi = { titre: `Crépi : ${fmt(num('crepi-surf'), 1)} m² en ${fmt(num('crepi-ep'), 0)} mm`, items: [[nomCourt(current('crepi').nom), sacs, `sacs de ${fmt(sac, 1)} kg`]] };
+  $('crepi-res').innerHTML = `<div class="big">${sacs} <span>sacs de ${fmt(sac, 1)} kg</span></div>
+    <dl class="rows"><dt>Poids total</dt><dd>${fmt(kg, 0)} kg</dd>
+    <dt>Eau par sac</dt><dd>${eauTxt(num('crepi-eau'))}</dd>
+    <dt>Eau en tout</dt><dd>${eauTxt(sacs * num('crepi-eau'))}</dd>
+    <dt>Marge incluse</dt><dd>${fmt(num('crepi-marge'), 0)} %</dd></dl>${CHECK}`;
+}
+function calcColle() {
+  const pg = (current('colle').peignes || PEIGNES_COURANTS)[num('colle-peigne')] || PEIGNES_COURANTS[0];
+  const conso = $('colle-double').value === '1' ? pg.d : pg.s;
+  const kg = num('colle-surf') * conso * (1 + num('colle-marge') / 100);
+  const sac = num('colle-sac') || 1;
+  const sacs = Math.ceil(kg / sac);
+  ACHATS.colle = { titre: `Colle : ${fmt(num('colle-surf'), 1)} m²`, items: [[nomCourt(current('colle').nom), sacs, `sacs de ${fmt(sac, 1)} kg`]] };
+  $('colle-res').innerHTML = `<div class="big">${sacs} <span>sacs de ${fmt(sac, 1)} kg</span></div>
+    <dl class="rows"><dt>Consommation retenue</dt><dd>${fmt(conso, 1)} kg/m²</dd>
+    <dt>Poids total</dt><dd>${fmt(kg, 0)} kg</dd>
+    <dt>Eau par sac</dt><dd>${eauTxt(num('colle-eau'))}</dd>
+    <dt>Eau en tout</dt><dd>${eauTxt(sacs * num('colle-eau'))}</dd></dl>${CHECK}`;
+}
+function calcSemelle() {
+  const iso = $('sem-type').value === 'isolee';
+  $('sem-n-lab').hidden = !iso;
+  $('sem-l-lab').firstChild.textContent = iso ? 'Longueur ' : 'Longueur totale ';
+  const n = iso ? Math.max(1, Math.round(num('sem-n'))) : 1;
+  const vol = num('sem-l') * num('sem-w') / 100 * num('sem-h') / 100 * n * (1 + num('sem-marge') / 100);
+  ACHATS.semelle = { titre: `Semelle ${iso ? 'isolée' : 'filante'} : ${fmt(vol, 2)} m³`, items: betonAchats(vol, num('sem-dos'), num('sem-sac'), $('sem-gran').value) };
+  $('sem-res').innerHTML = betonHtml(vol, num('sem-dos'), num('sem-sac'), $('sem-gran').value);
+}
+function calcDalle() {
+  const vol = num('dal-surf') * num('dal-ep') / 100 * (1 + num('dal-marge') / 100);
+  ACHATS.dalle = { titre: `Dalle : ${fmt(num('dal-surf'), 1)} m² en ${fmt(num('dal-ep'), 0)} cm`, items: betonAchats(vol, num('dal-dos'), num('dal-sac'), $('dal-gran').value) };
+  $('dal-res').innerHTML = betonHtml(vol, num('dal-dos'), num('dal-sac'), $('dal-gran').value);
+}
+// Liste de courses : chaque calcul y dépose ses achats [nom, quantité, unité]
+const ACHATS = {};
+const r2 = x => Math.round(x * 100) / 100;
+const nomCourt = nom => nom.replace(/\s*\(.*\)$/, '');
+function betonAchats(vol, dos, sac, gran) {
+  const it = [['Ciment Lafarge', Math.ceil(vol * dos / sac), `sacs de ${sac} kg`]];
+  if (gran === 'mel') it.push(['Mélange à béton 0/20', r2(vol), 'm³']);
+  else it.push(['Sable 0/4', r2(vol * 0.5), 'm³'], ['Gravier 4/20', r2(vol * 0.7), 'm³']);
+  return it;
+}
+// Recette fiche Lafarge « L'Original » : 1 sac de 35 kg (350 kg/m³) = 5 seaux de sable 0/4 + 7 seaux de gravillons 4/20,
+// ou 10 seaux de mélange à béton 0/20, + ~17 L d'eau, pour ~100 L de béton. Soit par m³ : 0,5 sable + 0,7 gravier, ou 1 m³ de 0/20.
+function betonHtml(vol, dos, sac, gran) {
+  const ciment = vol * dos, eau = vol * dos * 0.49;
+  const parSac = sac / dos * 1000 / (num('seau') || 10); // en seaux, pour un sac
+  const granRows = gran === 'mel'
+    ? `<dt>Mélange à béton 0/20</dt><dd>${fmt(vol, 2)} m³ (≈ ${fmt(vol * 1.7, 1)} t)</dd>`
+    : `<dt>Sable 0/4</dt><dd>${fmt(vol * 0.5, 2)} m³ (≈ ${fmt(vol * 0.5 * 1.6, 1)} t)</dd>
+       <dt>Gravier 4/20</dt><dd>${fmt(vol * 0.7, 2)} m³ (≈ ${fmt(vol * 0.7 * 1.5, 1)} t)</dd>`;
+  const gachee = gran === 'mel'
+    ? `${fmt(Math.round(parSac), 0)} seaux de mélange 0/20`
+    : `${fmt(Math.round(parSac * 0.5), 0)} seaux de sable + ${fmt(Math.round(parSac * 0.7), 0)} de gravier`;
+  return `<div class="big">${fmt(vol, 2)} <span>m³ de béton</span></div>
+    <dl class="rows"><dt>Ciment</dt><dd>${Math.ceil(ciment / sac)} sacs de ${sac} kg</dd>
+    ${granRows}
+    <dt>Par sac de ciment</dt><dd>${gachee}</dd>
+    <dt>Eau en tout</dt><dd>${eauTxt(eau)}</dd>
+    <dt>Eau par sac de ciment</dt><dd>${eauTxt(sac * 0.49)}</dd>
+    <dt>Brouettes de 60 L</dt><dd>≈ ${Math.ceil(vol * 1000 / 60)}</dd></dl>
+    <div class="note">Au-delà de 1 m³, compare avec un béton prêt à l'emploi livré en toupie. Ajoute l'eau petit à petit selon l'humidité du sable.</div>`;
+}
+// Densités en vrac (t/m³) et tassement courants, indicatifs : à vérifier auprès du fournisseur
+const MATERIAUX = {
+  castine: { d: 1.8, t: 20, nom: 'castine 0/31,5' }, tv: { d: 1.9, t: 20, nom: 'tout-venant 0/80' },
+  mel: { d: 1.7, t: 10, nom: 'mélange à béton 0/20' }, sable: { d: 1.6, t: 10, nom: 'sable 0/4' },
+  gravier: { d: 1.5, t: 10, nom: 'gravier roulé 5/15' }, deco: { d: 1.5, t: 5, nom: 'gravier décoratif 6/10' }
+};
+function applyMat() { const m = MATERIAUX[$('gr-mat').value]; $('gr-dens').value = m.d; $('gr-tass').value = m.t; }
+function calcGranulats() {
+  const m = MATERIAUX[$('gr-mat').value];
+  const vol = num('gr-surf') * num('gr-ep') / 100 * (1 + num('gr-tass') / 100);
+  const t = vol * num('gr-dens');
+  ACHATS.granulats = { titre: `Granulats : ${fmt(num('gr-surf'), 1)} m² en ${fmt(num('gr-ep'), 0)} cm`, items: [[m.nom[0].toUpperCase() + m.nom.slice(1), r2(t), 't']] };
+  $('gr-res').innerHTML = `<div class="big">${fmt(t, 1)} <span>tonnes de ${m.nom}</span></div>
+    <dl class="rows"><dt>Volume à commander</dt><dd>${fmt(vol, 2)} m³</dd>
+    <dt>Tassement + perte inclus</dt><dd>${fmt(num('gr-tass'), 0)} %</dd>
+    <dt>Brouettes de 60 L</dt><dd>≈ ${Math.ceil(vol * 1000 / 60)}</dd>
+    <dt>Big bags d'1 m³</dt><dd>${Math.ceil(vol)}</dd></dl>
+    <div class="note">La densité change selon la carrière et l'humidité : demande-la au fournisseur et corrige-la ici.</div>`;
+}
+// Mortier de montage : ~1 L par cm d'épaisseur de bloc et par m² (20 L/m² en 20 cm).
+// Recette fiche Lafarge « L'Original », montage 300 kg/m³ : 1 sac de 35 kg + 12 seaux de sable sec + ~17 L d'eau = ~120 L de mortier.
+function calcMur() {
+  const [parM2, ep] = $('mur-bloc').value.split('|');
+  const colle = ep.endsWith('b');
+  const surf = Math.max(0, num('mur-l') * num('mur-h') - num('mur-ouv'));
+  const blocs = Math.ceil(surf * parseFloat(parM2) * (1 + num('mur-marge') / 100));
+  const mortier = surf * parseFloat(ep) / 1000 * 1.1; // m³, avec 10 % de perte
+  const sac = num('mur-sac'), ciment = mortier * 300;
+  ACHATS.mur = { titre: `Mur : ${fmt(surf, 1)} m²`, items: [[$('mur-bloc').selectedOptions[0].textContent, blocs, 'pièces'], ['Ciment Lafarge', Math.ceil(ciment / sac), `sacs de ${sac} kg`], ['Sable 0/4', r2(mortier), 'm³']] };
+  $('mur-res').innerHTML = `<div class="big">${blocs} <span>blocs</span></div>
+    <dl class="rows"><dt>Surface de mur</dt><dd>${fmt(surf, 1)} m²</dd>
+    <dt>Mortier de montage</dt><dd>${fmt(mortier * 1000, 0)} L</dd>
+    <dt>Ciment</dt><dd>${Math.ceil(ciment / sac)} sacs de ${sac} kg</dd>
+    <dt>Sable 0/4</dt><dd>${fmt(mortier, 2)} m³ (≈ ${fmt(mortier * 1.6, 1)} t)</dd>
+    <dt>Par sac de ciment</dt><dd>${fmt(Math.round(sac / 300 * 1000 / (num('seau') || 10)), 0)} seaux de sable</dd>
+    <dt>Eau par sac</dt><dd>${eauTxt(sac * 0.49)}</dd></dl>
+    <div class="note">${colle ? 'Briques rectifiées collées : utilise plutôt le mortier-colle du fabricant (voir le sac).' : 'Compte à part les blocs d\'angle, les demi-blocs et les linteaux.'}</div>`;
+}
+function calcTreillis() {
+  const L = num('tr-l'), W = num('tr-w'), r = num('tr-rec') / 100;
+  const t = TREILLIS[num('tr-pan')] || TREILLIS[6];
+  const pl = t.L, pw = t.W;
+  const nb = (a, b) => Math.max(1, Math.ceil((a - r) / (pl - r))) * Math.max(1, Math.ceil((b - r) / (pw - r)));
+  const n = Math.min(nb(L, W), nb(W, L)); // meilleur sens de pose
+  ACHATS.treillis = { titre: `Treillis : dalle de ${fmt(L * W, 1)} m²`, items: [[`Treillis ${t.ref} ${fmt(pl, 2)} x ${fmt(pw, 2)} m`, n, 'panneaux'], ['Cales à treillis', Math.ceil(L * W * 4), 'pièces']] };
+  $('tr-res').innerHTML = `<div class="big">${n} <span>panneaux ${t.ref}</span></div>
+    <dl class="rows"><dt>Panneau</dt><dd>${fmt(pl, 2)} x ${fmt(pw, 2)} m</dd>
+    <dt>Fils</dt><dd>Ø ${t.d} mm, maille ${t.m} mm</dd>
+    <dt>Poids total</dt><dd>≈ ${fmt(n * t.kg, 0)} kg</dd>
+    <dt>Surface de dalle</dt><dd>${fmt(L * W, 1)} m²</dd>
+    <dt>Recouvrement</dt><dd>${fmt(r * 100, 0)} cm</dd>
+    <dt>Cales (≈ 4 par m²)</dt><dd>${Math.ceil(L * W * 4)}</dd></dl>
+    <div class="note">20 cm est le recouvrement minimum de la fiche ADETS. Selon le treillis et le sens, il peut être plus long : suis les plans ou le bureau d'études.</div>`;
+}
+// Fiche ADETS n°22 (2016) : références courantes de treillis soudés
+const TREILLIS = [
+  { ref: 'PAF R', L: 3.6, W: 2.4, d: '4,5', m: '200 x 300', kg: 9.0 },
+  { ref: 'PAF C', L: 3.6, W: 2.4, d: '4,5', m: '200 x 200', kg: 10.8 },
+  { ref: 'PAF 10', L: 4.2, W: 2.4, d: '5,5', m: '200 x 200', kg: 18.85 },
+  { ref: 'ST 15 C', L: 4, W: 2.4, d: '6', m: '200 x 200', kg: 21.31 },
+  { ref: 'ST 20', L: 6, W: 2.4, d: '6 et 7', m: '150 x 300', kg: 35.81 },
+  { ref: 'ST 25', L: 6, W: 2.4, d: '7', m: '150 x 300', kg: 43.49 },
+  { ref: 'ST 25 C', L: 6, W: 2.4, d: '7', m: '150 x 150', kg: 57.98 },
+  { ref: 'ST 25 CS', L: 3, W: 2.4, d: '7', m: '150 x 150', kg: 28.99 }
+];
+$('tr-pan').innerHTML = TREILLIS.map((t, i) => `<option value="${i}">${t.ref} · Ø${t.d} · ${fmt(t.L, 2)} x ${fmt(t.W, 2)} m</option>`).join('');
+$('tr-pan').value = '6';
+// Cages préfabriquées de 6 m ; recouvrement par défaut 50 cm (règle courante, à adapter)
+function calcPoteau() {
+  const sec = num('po-sec') / 100, L = num('po-l'), n = Math.max(1, Math.round(num('po-n'))), r = num('po-rec') / 100;
+  const vol = sec * sec * L * 1.1, sac = num('po-sac');
+  const parMorceau = L / n;
+  const cages = n * Math.max(1, Math.ceil((parMorceau - r) / (6 - r)));
+  ACHATS.poteau = { titre: `Poteaux / chaînages : ${fmt(L, 1)} m`, items: [[`Cage ${num('po-sec')}x${num('po-sec')} 4 HA ${num('po-ha')}, 6 m`, cages, 'pièces'], ['Ciment Lafarge', Math.ceil(vol * 350 / sac), `sacs de ${sac} kg`], ['Mélange à béton 0/20', r2(vol), 'm³']] };
+  const kgM = { 6: 0.222, 8: 0.395, 10: 0.617, 12: 0.888 }[num('po-ha')] * 4; // poids des 4 filants par mètre
+  $('po-res').innerHTML = `<div class="big">${cages} <span>cages de 6 m (4 HA ${num('po-ha')}, ${num('po-sec')}x${num('po-sec')})</span></div>
+    <dl class="rows"><dt>Béton</dt><dd>${fmt(vol * 1000, 0)} L (${fmt(vol, 2)} m³)</dd>
+    <dt>Ciment (350 kg/m³)</dt><dd>${Math.ceil(vol * 350 / sac)} sacs de ${sac} kg</dd>
+    <dt>Mélange à béton 0/20</dt><dd>${fmt(vol, 2)} m³</dd>
+    <dt>Eau en tout</dt><dd>${eauTxt(vol * 350 * 0.49)}</dd>
+    <dt>Poids des filants</dt><dd>≈ ${fmt(kgM * cages * 6, 0)} kg</dd></dl>
+    <div class="note">Pour les angles et les jonctions poteau-chaînage, ajoute des équerres. Le diamètre des aciers se décide sur plan.</div>`;
+}
+function eauTxt(litres) {
+  const s = num('seau') || 10;
+  const n = Math.round(litres / s * 2) / 2; // au demi-seau près
+  const seaux = n < 0.5 ? 'moins d\'un demi-seau' : `${fmt(n, 1)} seau${n > 1 ? 'x' : ''}`;
+  return `${seaux} (${fmt(litres, 0)} L)`;
+}
+
+function calcChape() {
+  const vol = num('chape-surf') * num('chape-ep') / 100 * (1 + num('chape-marge') / 100);
+  const betonniere = $('chape-mode').value === 'betonniere';
+  $('chape-dos').parentElement.hidden = $('chape-sac').parentElement.hidden = !betonniere;
+  if (betonniere) {
+    // Mortier de chape, pour 1 m³ : ~1 m³ de sable 0/4, eau ~45 % du poids de ciment (chape plutôt sèche)
+    const dos = num('chape-dos'), sac = num('chape-sac'), eau = vol * dos * 0.45;
+    ACHATS.chape = { titre: `Chape : ${fmt(num('chape-surf'), 1)} m² en ${fmt(num('chape-ep'), 0)} cm`, items: [['Ciment Lafarge', Math.ceil(vol * dos / sac), `sacs de ${sac} kg`], ['Sable 0/4', r2(vol), 'm³']] };
+    $('chape-res').innerHTML = `<div class="big">${Math.ceil(vol * dos / sac)} <span>sacs de ${sac} kg</span></div>
+      <dl class="rows"><dt>Volume de chape</dt><dd>${fmt(vol, 2)} m³</dd>
+      <dt>Sable 0/4</dt><dd>${fmt(vol, 2)} m³ (≈ ${fmt(vol * 1.6, 1)} t)</dd>
+      <dt>Eau en tout</dt><dd>${eauTxt(eau)}</dd>
+      <dt>Eau par sac de ciment</dt><dd>${eauTxt(sac * 0.45)}</dd></dl>
+      <div class="note">Chape « terre humide » : elle doit tenir en boule dans la main sans couler. Ajoute l'eau petit à petit.</div>`;
+    return;
+  }
+  const cmd = Math.ceil(vol * 2) / 2; // commande toupie arrondie au demi-m³
+  ACHATS.chape = { titre: `Chape toupie : ${fmt(num('chape-surf'), 1)} m²`, items: [['Béton de chape (toupie)', cmd, 'm³']] };
+  $('chape-res').innerHTML = `<div class="big">${fmt(cmd, 1)} <span>m³ à commander</span></div>
+    <dl class="rows"><dt>Volume calculé</dt><dd>${fmt(vol, 2)} m³</dd>
+    <dt>Marge incluse</dt><dd>${fmt(num('chape-marge'), 0)} %</dd>
+    <dt>Arrondi</dt><dd>au demi-m³ supérieur</dd></dl>
+    <div class="note">Vérifie le minimum de commande et le volume de la toupie avec la centrale à béton.</div>`;
+}
+
+function renderList() {
+  $('np-list').innerHTML = produits.map(p => `<li><span>${p.nom.replace(/</g, '&lt;')}<small>${p.type === 'crepi' ? 'Crépi' : 'Colle'} · sac ${fmt(p.sac)} kg · eau ${fmt(p.eau)} L${p.type === 'crepi' ? ' · ' + fmt(p.conso) + ' kg/m²/mm' : ''}</small></span><button data-del="${p.id}">Supprimer</button></li>`).join('');
+}
+function refresh() { fillSelect('crepi'); fillSelect('colle'); renderList(); }
+
+$('np-type').addEventListener('change', () => { $('np-conso-lab').hidden = $('np-type').value !== 'crepi'; });
+$('np-add').addEventListener('click', () => {
+  const nom = $('np-nom').value.trim(), type = $('np-type').value;
+  const msg = $('np-msg'); msg.hidden = false;
+  if (!nom || !num('np-sac') || !num('np-eau') || (type === 'crepi' && !num('np-conso'))) { msg.textContent = 'Il manque le nom, le poids du sac, l\'eau ou la consommation.'; return; }
+  const p = { id: 'p' + Date.now(), nom, type, sac: num('np-sac'), eau: num('np-eau'), conso: num('np-conso') };
+  produits.unshift(p); save(); refresh();
+  $(type + '-prod').value = p.id; applyProduct(type); calcCrepi(); calcColle();
+  msg.textContent = `« ${nom} » enregistré.`; $('np-nom').value = '';
+});
+$('np-list').addEventListener('click', e => {
+  const id = e.target.dataset.del; if (!id) return;
+  produits = produits.filter(p => p.id !== id); save(); refresh();
+  applyProduct('crepi'); applyProduct('colle'); calcCrepi(); calcColle();
+});
+
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
+  ['crepi', 'colle', 'semelle', 'dalle', 'chape', 'granulats', 'mur', 'treillis', 'poteau'].forEach(t => $('p-' + t).hidden = t !== b.dataset.tab);
+  try { localStorage.setItem('gachee-onglet', b.dataset.tab); } catch (e) {}
+}));
+['crepi', 'colle'].forEach(t => $(t + '-prod').addEventListener('change', () => { applyProduct(t); t === 'crepi' ? calcCrepi() : calcColle(); }));
+document.querySelectorAll('#p-crepi input').forEach(i => i.addEventListener('input', calcCrepi));
+document.querySelectorAll('#p-colle input, #p-colle select').forEach(i => i.addEventListener('input', calcColle));
+document.querySelectorAll('#p-semelle input, #p-semelle select').forEach(i => i.addEventListener('input', calcSemelle));
+document.querySelectorAll('#p-chape input, #p-chape select').forEach(i => i.addEventListener('input', calcChape));
+document.querySelectorAll('#p-dalle input, #p-dalle select').forEach(i => i.addEventListener('input', calcDalle));
+$('gr-mat').addEventListener('change', () => { applyMat(); calcGranulats(); });
+document.querySelectorAll('#p-granulats input').forEach(i => i.addEventListener('input', calcGranulats));
+document.querySelectorAll('#p-mur input, #p-mur select').forEach(i => i.addEventListener('input', calcMur));
+document.querySelectorAll('#p-treillis input, #p-treillis select').forEach(i => i.addEventListener('input', calcTreillis));
+document.querySelectorAll('#p-poteau input, #p-poteau select').forEach(i => i.addEventListener('input', calcPoteau));
+try { const s = localStorage.getItem('gachee-seau'); if (s) $('seau').value = s; } catch (e) {}
+$('seau').addEventListener('input', () => {
+  try { localStorage.setItem('gachee-seau', $('seau').value); } catch (e) {}
+  calcCrepi(); calcColle(); calcSemelle(); calcDalle(); calcChape(); calcMur(); calcPoteau();
+});
+applyMat();
+
+// Liste de courses
+let liste = [];
+try { liste = JSON.parse(localStorage.getItem('gachee-liste') || '[]'); } catch (e) { liste = []; }
+const saveListe = () => { try { localStorage.setItem('gachee-liste', JSON.stringify(liste)); } catch (e) {} };
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const qteTxt = (q, u) => `${fmt(q, 2)} ${u}`;
+function totaux() {
+  const m = new Map();
+  liste.forEach(c => c.items.forEach(([nom, q, u]) => { const k = nom + '|' + u; m.set(k, r2((m.get(k) || 0) + q)); }));
+  return [...m].map(([k, q]) => { const [nom, u] = k.split('|'); return [nom, q, u]; });
+}
+// Texte de la liste : détail par ouvrage (utile pour un devis) puis total à acheter
+function texteListe() {
+  const detail = liste.map(c => `${c.titre}\n` + c.items.map(([n, q, u]) => `  - ${n} : ${qteTxt(q, u)}`).join('\n')).join('\n');
+  return `Chantier du ${new Date().toLocaleDateString('fr-FR')} (Le Bon Dosage)\n\nDÉTAIL PAR OUVRAGE\n${detail}\n\nTOTAL À ACHETER\n` + totaux().map(([n, q, u]) => `- ${n} : ${qteTxt(q, u)}`).join('\n');
+}
+function renderListe() {
+  $('li-vide').hidden = liste.length > 0;
+  $('li-actions').hidden = liste.length === 0;
+  $('li-calculs').innerHTML = liste.map((c, i) => `<li><span>${esc(c.titre)}<small>${c.items.map(([n, q, u]) => esc(n) + ' : ' + qteTxt(q, u)).join(' · ')}</small></span><button data-li="${i}">Retirer</button></li>`).join('');
+  const t = totaux();
+  $('li-total').innerHTML = t.length ? `<h3>Total à acheter</h3><dl class="rows">${t.map(([n, q, u]) => `<dt>${esc(n)}</dt><dd>${qteTxt(q, u)}</dd>`).join('')}</dl>` : '';
+}
+document.addEventListener('click', e => {
+  const k = e.target.dataset && e.target.dataset.add;
+  if (!k || !ACHATS[k]) return;
+  liste.push(JSON.parse(JSON.stringify(ACHATS[k]))); saveListe(); renderListe();
+  e.target.textContent = 'Ajouté à la liste ✓';
+  setTimeout(() => { e.target.textContent = 'Ajouter à la liste'; }, 1500);
+});
+$('li-calculs').addEventListener('click', e => {
+  const i = e.target.dataset.li; if (i == null) return;
+  liste.splice(Number(i), 1); saveListe(); renderListe();
+});
+$('li-copier').addEventListener('click', () => {
+  const texte = texteListe();
+  const msg = $('li-msg'); msg.hidden = false; $('li-copie').hidden = true;
+  const echec = () => { msg.textContent = 'Copie automatique impossible ici : sélectionne le texte ci-dessous.'; $('li-copie').textContent = texte; $('li-copie').hidden = false; };
+  try { navigator.clipboard.writeText(texte).then(() => { msg.textContent = 'Liste copiée : tu peux la coller dans un SMS au fournisseur.'; }, echec); } catch (e) { echec(); }
+});
+// Menu Partager d'iOS / Android (Notes, SMS, WhatsApp...), sinon copie, sinon texte à sélectionner
+function partager(titre, texte, msgEl, preEl) {
+  msgEl.hidden = false; if (preEl) preEl.hidden = true;
+  const montrer = () => { msgEl.textContent = 'Sélectionne le texte ci-dessous et copie-le.'; if (preEl) { preEl.textContent = texte; preEl.hidden = false; } };
+  const copier = () => {
+    try { navigator.clipboard.writeText(texte).then(() => { msgEl.textContent = 'Copié : colle-le dans Notes, un SMS ou WhatsApp.'; }, montrer); } catch (e) { montrer(); }
+  };
+  if (navigator.share) {
+    navigator.share({ title: titre, text: texte }).then(() => { msgEl.textContent = 'Envoyé.'; }, err => { if (err && err.name === 'AbortError') msgEl.hidden = true; else copier(); });
+  } else copier();
+}
+$('li-partager').addEventListener('click', () => {
+  const texte = texteListe();
+  partager('Liste de courses', texte, $('li-msg'), $('li-copie'));
+});
+const ENTETE = 'LE BON DOSAGE - SAUVEGARDE';
+$('sv-envoyer').addEventListener('click', () => {
+  const champs = {}; CHAMPS.forEach(el => { champs[el.id] = el.value; });
+  const data = { v: 1, date: new Date().toISOString().slice(0, 10), produits, poss, liste, champs };
+  const texte = `${ENTETE} du ${data.date}\nPour restaurer : copie tout ce texte et colle-le dans l'appli, rubrique Sauvegarde.\n${JSON.stringify(data)}`;
+  partager('Sauvegarde Le Bon Dosage', texte, $('sv-msg'), $('sv-texte'));
+});
+let restArme = null;
+$('sv-restaurer').addEventListener('click', () => {
+  const msg = $('sv-res-msg'); msg.hidden = false;
+  const t = $('sv-coller').value, a = t.indexOf('{'), b = t.lastIndexOf('}');
+  let data = null;
+  try { data = JSON.parse(t.slice(a, b + 1)); } catch (e) { data = null; }
+  if (!data || data.v !== 1 || !Array.isArray(data.produits)) { msg.textContent = 'Ce texte n\'est pas une sauvegarde valide : copie bien toute la note, du début à la fin.'; return; }
+  if (!restArme) {
+    msg.textContent = `Sauvegarde du ${data.date} trouvée. Elle va remplacer les données actuelles : appuie encore sur Restaurer pour confirmer.`;
+    restArme = setTimeout(() => { restArme = null; }, 6000);
+    return;
+  }
+  clearTimeout(restArme); restArme = null;
+  produits = data.produits; poss = data.poss || {}; liste = data.liste || []; saved = data.champs || {};
+  save(); savePoss(); saveListe();
+  refresh(); remet('crepi-prod'); remet('colle-prod'); applyProduct('crepi'); applyProduct('colle');
+  CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
+  saveChamps(); Object.keys(CALCS).forEach(k => { renderPoss(k); CALCS[k](); }); renderListe();
+  msg.textContent = 'Sauvegarde restaurée.'; $('sv-coller').value = '';
+});
+// Compteur d'utilisation, gardé dans le téléphone : ne part que dans un avis envoyé par l'utilisateur
+let stats = {};
+try { stats = JSON.parse(localStorage.getItem('gachee-stats') || '{}'); } catch (e) { stats = {}; }
+function compte(key) { stats[key] = (stats[key] || 0) + 1; try { localStorage.setItem('gachee-stats', JSON.stringify(stats)); } catch (e) {} }
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => compte(b.dataset.tab)));
+function texteAvis() {
+  const NOMS = { crepi: 'Crépi', colle: 'Colle', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
+  let t = `Avis sur Le Bon Dosage (${document.querySelector('footer').textContent.match(/Version [\d.]+/)?.[0] || ''}, ${new Date().toLocaleDateString('fr-FR')})\n\n${$('av-texte').value.trim() || '(pas de commentaire)'}`;
+  if ($('av-stats').checked) {
+    const util = Object.entries(stats).sort((a, b) => b[1] - a[1]).map(([k, n]) => `- ${NOMS[k] || k} : ouvert ${n} fois`).join('\n');
+    const prods = produits.map(p => `- ${p.nom} (${p.type === 'crepi' ? 'crépi' : 'colle'}) : sac ${p.sac} kg, eau ${p.eau} L${p.type === 'crepi' ? ', ' + p.conso + ' kg/m²/mm' : ''}`).join('\n');
+    const nbPoss = Object.values(poss).reduce((n, l) => n + l.length, 0);
+    t += `\n\nCALCULS UTILISÉS\n${util || '- aucun pour l\'instant'}\n\nMES PRODUITS\n${prods || '- aucun'}\n\nPossibilités enregistrées : ${nbPoss}\nTaille du seau : ${$('seau').value} L`;
+  }
+  return t;
+}
+$('av-voir').addEventListener('click', () => { $('av-apercu').textContent = texteAvis(); $('av-apercu').hidden = false; $('av-envoyer').hidden = false; });
+$('av-envoyer').addEventListener('click', () => partager('Avis sur Le Bon Dosage', texteAvis(), $('av-msg'), $('av-apercu')));
+let viderArme = null;
+$('li-vider').addEventListener('click', () => {
+  if (!viderArme) {
+    $('li-vider').textContent = 'Confirmer : tout vider ?';
+    viderArme = setTimeout(() => { viderArme = null; $('li-vider').textContent = 'Vider la liste'; }, 4000);
+    return;
+  }
+  clearTimeout(viderArme); viderArme = null; $('li-vider').textContent = 'Vider la liste';
+  liste = []; saveListe(); renderListe(); $('li-msg').hidden = true; $('li-copie').hidden = true;
+});
+
+// Enregistrement automatique de tout ce qui est tapé
+const CHAMPS = [...document.querySelectorAll('.wrap input[id], .wrap select[id]')].filter(el => !el.id.startsWith('np-'));
+function saveChamps() {
+  const o = {}; CHAMPS.forEach(el => { o[el.id] = el.value; });
+  try { localStorage.setItem('gachee-champs', JSON.stringify(o)); } catch (e) {}
+}
+document.addEventListener('input', saveChamps);
+document.addEventListener('change', saveChamps);
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem('gachee-champs') || '{}'); } catch (e) { saved = {}; }
+function remet(id) {
+  const el = $(id); if (!el || saved[id] == null) return;
+  if (el.tagName === 'SELECT' && ![...el.options].some(o => o.value === saved[id])) return;
+  el.value = saved[id];
+}
+
+// Possibilités enregistrées : réglages d'un calcul gardés sous un nom, à rappeler plus tard
+const CALCS = { crepi: calcCrepi, colle: calcColle, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau };
+let poss = {};
+try { poss = JSON.parse(localStorage.getItem('gachee-possibilites') || '{}'); } catch (e) { poss = {}; }
+const savePoss = () => { try { localStorage.setItem('gachee-possibilites', JSON.stringify(poss)); } catch (e) {} };
+const champsDe = key => [...$('p-' + key).querySelectorAll('input[id], select[id]')];
+function renderPoss(key) {
+  const sel = $('poss-' + key), l = poss[key] || [];
+  sel.innerHTML = `<option value="">${l.length ? 'Mes possibilités enregistrées (' + l.length + ')' : 'Aucune possibilité enregistrée'}</option>` + l.map((x, i) => `<option value="${i}">${esc(x.nom)}</option>`).join('');
+  $('poss-del-' + key).hidden = true;
+  renderGestion();
+}
+const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux' };
+function renderGestion() {
+  const rows = [];
+  Object.keys(NOMS_CALC).forEach(k => (poss[k] || []).forEach((x, i) => rows.push(`<li><span>${esc(x.nom)}<small>${NOMS_CALC[k]}</small></span><button data-gk="${k}" data-gi="${i}">Supprimer</button></li>`)));
+  $('ge-list').innerHTML = rows.join('');
+  $('ge-vide').hidden = rows.length > 0;
+  $('ge-actions').hidden = rows.length === 0;
+}
+Object.keys(CALCS).forEach(key => {
+  const panel = $('p-' + key);
+  const row = document.createElement('div'); row.className = 'poss';
+  row.innerHTML = `<select id="poss-${key}" aria-label="Possibilités enregistrées"></select><button id="poss-del-${key}" hidden>Supprimer</button>`;
+  panel.querySelector('h2').after(row);
+  const btn = document.createElement('button'); btn.className = 'btn save-poss'; btn.textContent = 'Enregistrer cette possibilité';
+  panel.querySelector('.add-list').after(btn);
+  renderPoss(key);
+  btn.addEventListener('click', () => {
+    const champs = {}; champsDe(key).forEach(el => { champs[el.id] = el.value; });
+    (poss[key] = poss[key] || []).unshift({ nom: ACHATS[key] ? ACHATS[key].titre : key, champs });
+    savePoss(); renderPoss(key);
+    btn.textContent = 'Possibilité enregistrée ✓'; setTimeout(() => { btn.textContent = 'Enregistrer cette possibilité'; }, 1500);
+  });
+  $('poss-' + key).addEventListener('change', e => {
+    e.stopPropagation();
+    const x = (poss[key] || [])[e.target.value]; $('poss-del-' + key).hidden = !x; if (!x) return;
+    const ch = x.champs, mets = id => { const el = $(id); if (el && ch[id] != null) el.value = ch[id]; };
+    if (key === 'crepi' || key === 'colle') { mets(key + '-prod'); applyProduct(key); }
+    Object.keys(ch).forEach(mets);
+    if (key === 'granulats') { /* densité et tassement viennent de la possibilité */ }
+    CALCS[key](); saveChamps();
+  });
+  $('poss-del-' + key).addEventListener('click', () => {
+    const i = $('poss-' + key).value; if (i === '') return;
+    poss[key].splice(Number(i), 1); savePoss(); renderPoss(key);
+  });
+});
+
+$('ge-list').addEventListener('click', e => {
+  const k = e.target.dataset.gk; if (!k) return;
+  poss[k].splice(Number(e.target.dataset.gi), 1); savePoss(); renderPoss(k);
+});
+let toutArme = null;
+$('ge-tout').addEventListener('click', () => {
+  if (!toutArme) {
+    $('ge-tout').textContent = 'Confirmer : tout effacer ?';
+    toutArme = setTimeout(() => { toutArme = null; $('ge-tout').textContent = 'Tout effacer'; }, 4000);
+    return;
+  }
+  clearTimeout(toutArme); toutArme = null; $('ge-tout').textContent = 'Tout effacer';
+  poss = {}; savePoss(); Object.keys(CALCS).forEach(renderPoss);
+});
+
+refresh();
+remet('crepi-prod'); remet('colle-prod');
+applyProduct('crepi'); applyProduct('colle');
+CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
+try { const o = localStorage.getItem('gachee-onglet'); const b = o && document.querySelector(`.tabs button[data-tab="${o}"]`); if (b) b.click(); } catch (e) {}
+calcCrepi(); calcColle(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau();
+renderListe();
+// Mode hors ligne (ignoré là où ce n'est pas possible)
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
