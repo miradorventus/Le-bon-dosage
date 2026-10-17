@@ -35,6 +35,7 @@
 
 * { box-sizing: border-box }
 [hidden] { display: none !important }
+:root { accent-color: var(--accent) }
 body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 17px; line-height: 1.45; margin: 0;
   padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); padding-block: max(12px, env(safe-area-inset-top, 0px)) calc(96px + env(safe-area-inset-bottom, 0px)); -webkit-text-size-adjust: 100% }
 .panel { padding: 14px 12px }
@@ -347,13 +348,14 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <!-- AVIS -->
   <section class="panel" id="avis">
     <h2>Donner mon avis</h2>
-    <p style="margin:0;color:var(--muted);font-size:.95rem">Aide à améliorer l'appli. Rien n'est envoyé tout seul : tu vois le message avant, et c'est toi qui choisis à qui l'envoyer.</p>
+    <p style="margin:0;color:var(--muted);font-size:.95rem">Aide à améliorer l'appli. Rien n'est envoyé tout seul : tu vois le message avant, puis tu l'envoies par mail au créateur de l'appli ou par le moyen de ton choix.</p>
     <label>Ce qui manque, ce qui est faux ou pas pratique
       <textarea id="av-texte" rows="3" style="font:inherit;font-size:.95rem;padding:10px 12px;border:2px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);width:100%"></textarea></label>
     <label style="flex-direction:row;align-items:center;gap:10px;font-weight:500"><input type="checkbox" id="av-stats" checked style="width:auto"> Joindre les calculs que j'utilise le plus et mes produits</label>
     <button class="btn" id="av-voir" style="align-self:flex-start">Voir le message</button>
     <pre id="av-apercu" hidden style="white-space:pre-wrap;background:var(--bg);border-radius:6px;padding:10px;font-size:.85rem;margin:0"></pre>
-    <button class="btn solid" id="av-envoyer" style="align-self:flex-start" hidden>Envoyer mon avis</button>
+    <div class="li-actions" id="av-actions" hidden><a class="btn solid" id="av-mail" href="#" hidden style="text-decoration:none">Envoyer par mail</a><button class="btn" id="av-envoyer">Envoyer autrement</button></div>
+    <p id="av-adresse" hidden style="margin:0;font-size:.9rem;color:var(--muted)"></p>
     <p id="av-msg" style="margin:0;font-size:.9rem;color:var(--muted)" hidden></p>
   </section>
 
@@ -757,7 +759,17 @@ function texteAvis() {
   }
   return t;
 }
-$('av-voir').addEventListener('click', () => { $('av-apercu').textContent = texteAvis(); $('av-apercu').hidden = false; $('av-envoyer').hidden = false; });
+// Adresse qui reçoit les avis (vide = pas de bouton mail, seulement le menu Partager)
+const AVIS_MAIL = 'lebondosage@gmail.com';
+$('av-voir').addEventListener('click', () => {
+  const t = texteAvis();
+  $('av-apercu').textContent = t; $('av-apercu').hidden = false; $('av-actions').hidden = false;
+  if (AVIS_MAIL) {
+    $('av-mail').href = `mailto:${AVIS_MAIL}?subject=${encodeURIComponent('Avis sur Le Bon Dosage')}&body=${encodeURIComponent(t)}`;
+    $('av-mail').hidden = false;
+    $('av-adresse').textContent = `Si le mail ne s'ouvre pas, envoie ce texte à : ${AVIS_MAIL}`; $('av-adresse').hidden = false;
+  }
+});
 $('av-envoyer').addEventListener('click', () => partager('Avis sur Le Bon Dosage', texteAvis(), $('av-msg'), $('av-apercu')));
 let viderArme = null;
 $('li-vider').addEventListener('click', () => {
