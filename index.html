@@ -69,6 +69,10 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 .champ, #es-sol, #es-perso { display: flex; flex-direction: column; gap: 10px }
 .seg-titre { font-weight: 600 }
+.seg-ico { grid-template-columns: repeat(3, 1fr) }
+.seg-ico button { padding: 8px; text-align: center; display: grid; justify-items: center; gap: 2px }
+.seg-ico svg { width: 100%; max-width: 76px; height: auto; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.seg-ico small { font-size: .72rem; font-weight: 600 }
 .recap { margin: 0; padding-left: 18px; display: grid; gap: 2px }
 .seg { display: grid; gap: 8px }
 .seg button { font: inherit; font-weight: 600; padding: 12px 14px; border: 2px solid var(--accent); border-radius: 6px; background: transparent; color: var(--accent); text-align: left; cursor: pointer }
@@ -351,7 +355,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <section class="panel" id="p-escalier" hidden>
     <h2>Escalier en béton</h2>
     <div class="champ"><span class="seg-titre">Forme de l'escalier</span>
-      <select id="es-forme" class="seg-src"><option value="droit">Droit</option><option value="quart">Quart tournant (un angle)</option><option value="demi">Demi-tournant (aller-retour)</option></select></div>
+      <select id="es-forme" class="seg-src" data-icons="1"><option value="droit">Droit</option><option value="quart">Quart tournant</option><option value="demi">Demi-tournant</option></select></div>
     <div class="champ" id="es-virage-box" hidden><span class="seg-titre">Dans le virage</span>
       <select id="es-virage" class="seg-src"><option value="palier">Un palier</option><option value="tournant">Des marches tournantes</option></select></div>
     <div class="grid2">
@@ -531,7 +535,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.13 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.13.1 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -818,11 +822,14 @@ function calcEscalier() {
     <h3 class="sous">Béton</h3>${betonHtml(vol, num('es-dos'), num('es-sac'), $('es-gran').value)}`;
 }
 // Choix en gros boutons (un par ligne) à la place d'un menu déroulant : le menu reste caché et garde la valeur
+// Formes d'escalier : petits plans vus de dessus, flèche dans le sens de la montée
+const ICONES = { droit: '<svg viewBox="0 0 60 60"><rect x="20" y="3" width="20" height="54"/><path d="M20 9H40M20 15H40M20 21H40M20 27H40M20 33H40M20 39H40M20 45H40M20 51H40" stroke-width="1"/><path d="M30 54V8M26 12l4-5 4 5"/></svg>', quart: '<svg viewBox="0 0 60 60"><path d="M5 57V3h52v20H25v34z"/><path d="M5 23h20V3" stroke-width="1"/><path d="M5 29H25M5 35H25M5 41H25M5 47H25M5 53H25M31 3V23M37 3V23M43 3V23M49 3V23M55 3V23" stroke-width="1"/><path d="M15 54V13h37M48 9l5 4-5 4"/></svg>', demi: '<svg viewBox="0 0 60 60"><path d="M4 57V3h52v54H34V23h-8v34z"/><path d="M4 23h22M34 23h22" stroke-width="1"/><path d="M4 29H26M4 35H26M4 41H26M4 47H26M4 53H26M34 29H56M34 35H56M34 41H56M34 47H56M34 53H56" stroke-width="1"/><path d="M15 54V13h30v41M41 50l4 5 4-5"/></svg>' };
 function majSeg(sel) { sel.nextElementSibling.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === sel.value)); }
 document.querySelectorAll('.seg-src').forEach(sel => {
-  const box = document.createElement('div'); box.className = 'seg';
+  const box = document.createElement('div'); box.className = 'seg' + (sel.dataset.icons ? ' seg-ico' : '');
   [...sel.options].forEach(o => {
-    const b = document.createElement('button'); b.type = 'button'; b.textContent = o.textContent; b.dataset.v = o.value;
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.v = o.value;
+    if (sel.dataset.icons) { b.innerHTML = ICONES[o.value] + `<small>${o.textContent.split(' (')[0]}</small>`; b.setAttribute('aria-label', o.textContent); } else b.textContent = o.textContent;
     b.addEventListener('click', () => { sel.value = o.value; sel.dispatchEvent(new Event('input', { bubbles: true })); });
     box.append(b);
   });
