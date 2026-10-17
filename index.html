@@ -135,6 +135,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   </nav>
   <nav class="tabs" role="tablist">
     <button role="tab" id="t-crepi" aria-selected="true" data-tab="crepi" data-cat="murs">Crépi</button>
+    <button role="tab" id="t-carreaux" aria-selected="false" data-tab="carreaux" data-cat="carrelage">Carreaux</button>
     <button role="tab" id="t-colle" aria-selected="false" data-tab="colle" data-cat="carrelage">Colle</button>
     <button role="tab" id="t-joints" aria-selected="false" data-tab="joints" data-cat="carrelage">Joints</button>
     <button role="tab" id="t-semelle" aria-selected="false" data-tab="semelle" data-cat="beton">Semelle</button>
@@ -184,6 +185,22 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   </section>
 
   <!-- JOINTS DE CARRELAGE -->
+  <!-- CARREAUX -->
+  <section class="panel" id="p-carreaux" hidden>
+    <h2>Nombre de carreaux</h2>
+    <div class="grid2">
+      <label>Surface <small>m²</small><input id="ca-surf" type="number" inputmode="decimal" value="20"></label>
+      <label>Pose
+        <select id="ca-pose"><option value="10">Droite</option><option value="15">Décalée ou diagonale</option><option value="20">Chevron ou point de Hongrie</option></select></label>
+      <label>Carreau, longueur <small>cm</small><input id="ca-a" type="number" inputmode="decimal" value="60"></label>
+      <label>Carreau, largeur <small>cm</small><input id="ca-b" type="number" inputmode="decimal" value="60"></label>
+      <label>Marge de coupe <small>%</small><input id="ca-marge" type="number" inputmode="decimal" value="10"></label>
+      <label>Une boîte fait <small>m², voir le carton</small><input id="ca-boite" type="number" inputmode="decimal" value="1.44"></label>
+    </div>
+    <div class="result" id="ca-res"></div>
+    <button class="btn add-list" data-add="carreaux">Ajouter à la liste</button>
+  </section>
+
   <section class="panel" id="p-joints" hidden>
     <h2>Joints de carrelage</h2>
     <label>Produit
@@ -463,7 +480,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.10.5 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.11 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -695,6 +712,23 @@ function calcJoints() {
     <dt>Eau par sac</dt><dd>${fmt(parseFloat(eau), 2)} L</dd></dl>
     ${hors ? `<div class="note">Ce joint est prévu pour des largeurs ${type === 'fin' ? 'de 1 à 4 mm' : 'de 5 à 50 mm'} : choisis l'autre joint.</div>` : ''}${CHECK}`;
 }
+// Carreaux : surface + marge de coupe selon la pose, arrondi à la boîte entière
+function calcCarreaux() {
+  const surf = num('ca-surf'), a = num('ca-a'), b = num('ca-b'), boite = num('ca-boite');
+  const m2 = surf * (1 + num('ca-marge') / 100);
+  const unit = a * b / 10000;
+  const nb = unit ? Math.ceil(m2 / unit) : 0;
+  const boites = boite ? Math.ceil(m2 / boite) : 0;
+  const parBoite = boite && unit ? Math.round(boite / unit) : 0;
+  ACHATS.carreaux = { titre: `Carreaux : ${fmt(surf, 1)} m², ${fmt(a, 0)}x${fmt(b, 0)}`,
+    items: boites ? [[`Carreaux ${fmt(a, 0)}x${fmt(b, 0)}`, boites, `boîte${boites > 1 ? 's' : ''} de ${fmt(boite, 2)} m²`]] : [[`Carreaux ${fmt(a, 0)}x${fmt(b, 0)}`, nb, 'carreaux']] };
+  $('ca-res').innerHTML = `<div class="big">${boites || nb} <span>${boites ? `boîte${boites > 1 ? 's' : ''}` : 'carreaux'}</span></div>
+    <dl class="rows"><dt>Carreaux</dt><dd>${nb}</dd>
+    <dt>Avec la marge</dt><dd>${fmt(m2, 2)} m²</dd>
+    ${boites ? `<dt>Dans les boîtes</dt><dd>${fmt(boites * boite, 2)} m²</dd>${parBoite ? `<dt>Par boîte</dt><dd>≈ ${parBoite} carreaux</dd>` : ''}` : ''}</dl>
+    <div class="note">Prends toutes les boîtes dans le même lot (même nuance et calibre, noté sur le carton) et garde-en une de côté pour les réparations.</div>`;
+}
+$('ca-pose').addEventListener('change', () => { $('ca-marge').value = $('ca-pose').value; calcCarreaux(); });
 // Ouverture dans un mur : linteau (portée + appuis) et jambages coulés sur toute l'épaisseur
 function calcOuverture() {
   const ha = num('ou-ha');
@@ -828,7 +862,7 @@ $('np-list').addEventListener('click', e => {
 
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
-  ['crepi', 'colle', 'joints', 'semelle', 'dalle', 'chape', 'granulats', 'mur', 'treillis', 'poteau', 'ouverture'].forEach(t => $('p-' + t).hidden = t !== b.dataset.tab);
+  document.querySelectorAll('.tabs button').forEach(x => { $('p-' + x.dataset.tab).hidden = x !== b; });
   try { localStorage.setItem('gachee-onglet', b.dataset.tab); } catch (e) {}
   montreCat(b.dataset.cat);
   try { localStorage.setItem('gachee-onglet-' + b.dataset.cat, b.dataset.tab); } catch (e) {}
@@ -865,6 +899,7 @@ document.querySelectorAll('#p-granulats input').forEach(i => i.addEventListener(
 document.querySelectorAll('#p-mur input, #p-mur select').forEach(i => i.addEventListener('input', calcMur));
 document.querySelectorAll('#p-treillis input, #p-treillis select').forEach(i => i.addEventListener('input', calcTreillis));
 document.querySelectorAll('#p-joints input, #p-joints select').forEach(i => i.addEventListener('input', calcJoints));
+document.querySelectorAll('#p-carreaux input').forEach(i => i.addEventListener('input', calcCarreaux));
 document.querySelectorAll('#p-ouverture input, #p-ouverture select').forEach(i => i.addEventListener('input', calcOuverture));
 document.querySelectorAll('#p-poteau input, #p-poteau select').forEach(i => i.addEventListener('input', calcPoteau));
 try { const s = localStorage.getItem('gachee-seau'); if (s) $('seau').value = s; } catch (e) {}
@@ -1014,7 +1049,7 @@ function remet(id) {
 }
 
 // Possibilités enregistrées : réglages d'un calcul gardés sous un nom, à rappeler plus tard
-const CALCS = { crepi: calcCrepi, colle: calcColle, joints: calcJoints, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau, ouverture: calcOuverture };
+const CALCS = { crepi: calcCrepi, colle: calcColle, carreaux: calcCarreaux, joints: calcJoints, semelle: calcSemelle, dalle: calcDalle, chape: calcChape, granulats: calcGranulats, mur: calcMur, treillis: calcTreillis, poteau: calcPoteau, ouverture: calcOuverture };
 let poss = {};
 try { poss = JSON.parse(localStorage.getItem('gachee-possibilites') || '{}'); } catch (e) { poss = {}; }
 const savePoss = () => { try { localStorage.setItem('gachee-possibilites', JSON.stringify(poss)); } catch (e) {} };
@@ -1025,7 +1060,7 @@ function renderPoss(key) {
   $('poss-del-' + key).hidden = true;
   renderGestion();
 }
-const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux', ouverture: 'Ouverture' };
+const NOMS_CALC = { crepi: 'Crépi', colle: 'Colle', carreaux: 'Carreaux', joints: 'Joints', semelle: 'Semelle', dalle: 'Dalle', chape: 'Chape', granulats: 'Granulats', mur: 'Parpaings', treillis: 'Treillis', poteau: 'Poteaux', ouverture: 'Ouverture' };
 function renderGestion() {
   const rows = [];
   Object.keys(NOMS_CALC).forEach(k => (poss[k] || []).forEach((x, i) => rows.push(`<li><span>${esc(x.nom)}<small>${NOMS_CALC[k]}</small></span><button data-gk="${k}" data-gi="${i}">Supprimer</button></li>`)));
@@ -1083,7 +1118,7 @@ applyProduct('crepi'); applyProduct('colle');
 CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
 try { const o = localStorage.getItem('gachee-onglet'); const b = o && document.querySelector(`.tabs button[data-tab="${o}"]`); if (b) b.click(); } catch (e) {}
 montreCat(document.querySelector('.tabs button[aria-selected="true"]').dataset.cat);
-calcCrepi(); calcColle(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau(); calcOuverture();
+calcCrepi(); calcColle(); calcCarreaux(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau(); calcOuverture();
 renderListe();
 const SEL_INFO = ['crepi-prod', 'colle-prod', 'jo-prod', 'mur-mortier', 'sem-gran', 'dal-gran', 'po-gran', 'ou-gran'];
 SEL_INFO.forEach(id => { $(id).addEventListener('change', () => majInfo($(id))); $(id).addEventListener('input', () => majInfo($(id))); majInfo($(id)); });
