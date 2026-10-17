@@ -414,6 +414,9 @@ const DEFAULTS = {
   crepi: [
     { id: 'def-pralf', nom: 'Weber.pral F (fiche : 22 à 28 kg/m² en 15 mm ; eau : voir le sac)', sac: 25, eau: 5, conso: 1.7 },
     { id: 'def-litehr', nom: 'Weber.lite HR allégé (fiche : 15 kg/m² en 15 mm ; eau : voir le sac)', sac: 25, eau: 5, conso: 1.0 },
+    // Fiches techniques vendues chez Chausson (relevées le 17/10/2026) : eau = milieu de la fourchette
+    { id: 'def-parexi', nom: 'ParexLanko PAREXI, monocouche lourd OC3, sac 30 kg (fiche : 1,6 kg/m²/mm ; eau 4,5 à 5,4 L)', sac: 30, eau: 5, conso: 1.6 },
+    { id: 'def-monorex', nom: 'ParexLanko MONOREX GF, monocouche semi-allégé (fiche : 1,3 kg/m²/mm ; eau 5,2 à 6,3 L)', sac: 25, eau: 5.8, conso: 1.3 },
     { id: 'def-crepi', nom: 'Enduit monocouche prêt à l\'emploi (valeurs courantes)', sac: 25, eau: 5, conso: 1.4 },
     { id: 'def-chaux', nom: 'Enduit à la chaux prêt à l\'emploi (valeurs courantes)', sac: 25, eau: 5.5, conso: 1.6 }
   ],
@@ -423,6 +426,11 @@ const DEFAULTS = {
       { l: '6x6 mm, carreau ≤ 500 cm²', s: 3.5, d: 5 }, { l: '9x9 mm, carreau > 500 cm²', s: 4.5, d: 6 }, { l: 'Demi-lune 20x8, carreau > 500 cm²', s: 5.5, d: 7 }] },
     { id: 'def-colflexeco', nom: 'Weber.col flex éco (fiche fabricant)', sac: 25, eau: 6.4, peignes: [
       { l: '6x6 mm, carreau ≤ 500 cm²', s: 3, d: 4.5 }, { l: '9x9 mm, carreau > 500 cm²', s: 4, d: 5.5 }, { l: 'Demi-lune 20x8, carreau > 500 cm²', s: 5, d: 6.5 }] },
+    // Colles Edilis (marque Chausson) : eau de la fiche, consommation 3 à 8 kg/m² selon le peigne (valeurs par peigne courantes)
+    { id: 'def-edilis-hp', nom: 'Edilis Colle Pro HP (fiche : eau 5,5 à 6 L ; 3 à 8 kg/m²)', sac: 25, eau: 5.75 },
+    { id: 'def-edilis-souple', nom: 'Edilis Colle souple C2S1 (fiche : eau 6,5 à 7 L ; 3,5 à 8 kg/m²)', sac: 25, eau: 6.75 },
+    { id: 'def-edilis-std', nom: 'Edilis Colle standard plus C2 (fiche : eau 5,5 à 6 L ; 3,5 à 8 kg/m²)', sac: 25, eau: 5.75 },
+    { id: 'def-edilis-allegee', nom: 'Edilis Colle souple allégée, sac 15 kg (fiche CSTB : eau 7,2 à 7,6 L)', sac: 15, eau: 7.4 },
     { id: 'def-colle', nom: 'Colle ciment C2 (valeurs courantes)', sac: 25, eau: 6 }
   ]
 };
