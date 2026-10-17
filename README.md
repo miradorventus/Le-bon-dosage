@@ -2,6 +2,8 @@
 
 Calculs de chantier pour maçons, sur le téléphone : combien de sacs, de seaux d'eau, de m³ ou de tonnes pour un chantier de maison individuelle.
 
+👉 **Ouvrir l'appli : [miradorventus.github.io/Le-bon-dosage](https://miradorventus.github.io/Le-bon-dosage/)** (gratuite, sans compte, marche hors ligne)
+
 **Version 0.12.1 (prototype)** · fait avec un maçon, pour de vrais chantiers.
 
 ## Ce qu'elle calcule
