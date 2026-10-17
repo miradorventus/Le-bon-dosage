@@ -88,6 +88,8 @@ input, select { font: inherit; font-size: 1.15rem; padding: 10px 12px; border: 2
 .prodlist button { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: none; color: var(--muted); border-radius: 4px; padding: 6px 10px; cursor: pointer }
 footer { color: var(--muted); font-size: .85rem }
 .apropos { color: var(--muted); font-size: .9rem }
+h3.sous { font-family: var(--f-display); font-size: 1.15rem; margin: 2px 0 -6px }
+h3.sous small { font-family: var(--f-body); font-size: .8rem; font-weight: 400; color: var(--muted) }
 label small.info-prod { color: var(--muted); font-size: .82rem; font-weight: 400; line-height: 1.35 }
 .apropos summary { cursor: pointer; font-weight: 600; color: var(--fg); padding: 6px 0 }
 .apropos ul { padding-left: 1.2em; margin: 0 }
@@ -313,14 +315,25 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <!-- OUVERTURE : LINTEAU + JAMBAGES -->
   <section class="panel" id="p-ouverture" hidden>
     <h2>Ouverture : linteau et jambages</h2>
+    <h3 class="sous">Linteau</h3>
     <div class="grid2">
-      <label>Largeur de l'ouverture <small>m</small><input id="ou-l" type="number" inputmode="decimal" value="1.2"></label>
-      <label>Hauteur de l'ouverture <small>m</small><input id="ou-h" type="number" inputmode="decimal" value="2.15"></label>
-      <label>Épaisseur du mur <small>cm</small><input id="ou-ep" type="number" inputmode="decimal" value="50"></label>
-      <label>Hauteur du linteau <small>cm</small><input id="ou-hl" type="number" inputmode="decimal" value="20"></label>
-      <label>Appui du linteau <small>cm de chaque côté</small><input id="ou-app" type="number" inputmode="decimal" value="20"></label>
-      <label>Largeur des jambages <small>cm</small><input id="ou-jl" type="number" inputmode="decimal" value="20"></label>
-      <label>Jambages <select id="ou-jamb"><option value="2" selected>2 jambages</option><option value="1">1 jambage</option><option value="0">Linteau seul</option></select></label>
+      <label>Longueur <small>m, appuis compris</small><input id="ou-ll" type="number" inputmode="decimal" value="1.6"></label>
+      <label>Hauteur <small>cm</small><input id="ou-lh" type="number" inputmode="decimal" value="20"></label>
+      <label>Profondeur <small>cm (épaisseur du mur)</small><input id="ou-lp" type="number" inputmode="decimal" value="50"></label>
+    </div>
+    <h3 class="sous">Jambage gauche <small>(0 si aucun)</small></h3>
+    <div class="grid2">
+      <label>Hauteur <small>m</small><input id="ou-gh" type="number" inputmode="decimal" value="2.15"></label>
+      <label>Largeur <small>cm</small><input id="ou-gl" type="number" inputmode="decimal" value="20"></label>
+      <label>Profondeur <small>cm</small><input id="ou-gp" type="number" inputmode="decimal" value="50"></label>
+    </div>
+    <h3 class="sous">Jambage droit <small>(0 si aucun)</small></h3>
+    <div class="grid2">
+      <label>Hauteur <small>m</small><input id="ou-dh" type="number" inputmode="decimal" value="2.15"></label>
+      <label>Largeur <small>cm</small><input id="ou-dl" type="number" inputmode="decimal" value="20"></label>
+      <label>Profondeur <small>cm</small><input id="ou-dp" type="number" inputmode="decimal" value="50"></label>
+    </div>
+    <div class="grid2">
       <label>Aciers <select id="ou-ha"><option value="8">4 HA 8</option><option value="10" selected>4 HA 10</option><option value="12">4 HA 12</option></select></label>
       <label>Béton
         <select id="ou-gran"><option value="mel">Ciment + mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
@@ -671,24 +684,26 @@ function calcJoints() {
 }
 // Ouverture dans un mur : linteau (portée + appuis) et jambages coulés sur toute l'épaisseur
 function calcOuverture() {
-  const L = num('ou-l'), H = num('ou-h'), ep = num('ou-ep') / 100, hl = num('ou-hl') / 100, app = num('ou-app') / 100, jl = num('ou-jl') / 100;
-  const nj = parseInt($('ou-jamb').value, 10), ha = num('ou-ha');
-  const lLint = L + 2 * app;
-  const vLint = lLint * hl * ep, vJamb = nj * H * jl * ep;
+  const ha = num('ou-ha');
+  const lLint = num('ou-ll');
+  const vLint = lLint * num('ou-lh') / 100 * num('ou-lp') / 100;
+  const jambs = [['gauche', num('ou-gh'), num('ou-gl'), num('ou-gp')], ['droit', num('ou-dh'), num('ou-dl'), num('ou-dp')]]
+    .filter(j => j[1] > 0 && j[2] > 0 && j[3] > 0).map(([c, h, l, pr]) => ({ c, h, l, pr, v: h * l / 100 * pr / 100 }));
+  const vJamb = jambs.reduce((t, j) => t + j.v, 0);
   const vol = (vLint + vJamb) * 1.1; // 10 % de perte
   const obra = $('ou-gran').value === 'obra', sac = num('ou-sac');
   $('ou-sac').parentElement.hidden = obra;
   // Cages du commerce de 6 m, 4 filants : une par linteau (jusqu'à 6 m), une par jambage
-  const cages = Math.ceil(lLint / 6) + nj * Math.ceil(H / 6);
+  const cages = (lLint > 0 ? Math.ceil(lLint / 6) : 0) + jambs.reduce((t, j) => t + Math.ceil(j.h / 6), 0);
   const cage = `Cage 15x15 4 HA ${ha}, 6 m`;
   const kgM = { 8: 0.395, 10: 0.617, 12: 0.888 }[ha] * 4;
   const items = [[cage, cages, 'pièces']];
   if (obra) items.push(['Béton sec OBRA C25/30', Math.ceil(vol * OBRA_SACS_M3), 'sacs de 25 kg']);
   else items.push(['Ciment Lafarge', Math.ceil(vol * 350 / sac), `sacs de ${sac} kg`], ['Mélange à béton 0/20', r2(vol), 'm³']);
-  ACHATS.ouverture = { titre: `Ouverture ${fmt(L, 2)} x ${fmt(H, 2)} m, mur de ${fmt(num('ou-ep'), 0)} cm`, items };
+  ACHATS.ouverture = { titre: `Ouverture : linteau ${fmt(lLint, 2)} m${jambs.length ? ` + ${jambs.length} jambage${jambs.length > 1 ? 's' : ''}` : ''}`, items };
   $('ou-res').innerHTML = `<div class="big">${fmt(vol * 1000, 0)} <span>L de béton</span></div>
-    <dl class="rows"><dt>Linteau</dt><dd>${fmt(lLint, 2)} m x ${fmt(hl * 100, 0)} x ${fmt(ep * 100, 0)} cm (${fmt(vLint * 1000, 0)} L)</dd>
-    ${nj ? `<dt>Jambage${nj > 1 ? 's' : ''}</dt><dd>${nj} x ${fmt(H, 2)} m x ${fmt(jl * 100, 0)} x ${fmt(ep * 100, 0)} cm (${fmt(vJamb * 1000, 0)} L)</dd>` : ''}
+    <dl class="rows">${lLint > 0 ? `<dt>Linteau</dt><dd>${fmt(lLint, 2)} m x ${fmt(num('ou-lh'), 0)} x ${fmt(num('ou-lp'), 0)} cm (${fmt(vLint * 1000, 0)} L)</dd>` : ''}
+    ${jambs.map(j => `<dt>Jambage ${j.c}</dt><dd>${fmt(j.h, 2)} m x ${fmt(j.l, 0)} x ${fmt(j.pr, 0)} cm (${fmt(j.v * 1000, 0)} L)</dd>`).join('')}
     ${obra ? `<dt>Béton sec OBRA C25/30</dt><dd>${Math.ceil(vol * OBRA_SACS_M3)} sacs de 25 kg</dd>
     <dt>Eau</dt><dd>3 L par sac</dd>` : `<dt>Ciment (350 kg/m³)</dt><dd>${Math.ceil(vol * 350 / sac)} sacs de ${sac} kg</dd>
     <dt>Mélange à béton 0/20</dt><dd>${fmt(vol, 2)} m³</dd>
