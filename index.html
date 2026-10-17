@@ -45,7 +45,8 @@
 * { box-sizing: border-box }
 [hidden] { display: none !important }
 :root { accent-color: var(--accent) }
-body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 17px; line-height: 1.45; margin: 0;
+html { font-size: 110% } /* tout un peu plus gros pour les doigts de chantier */
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 1.07rem; line-height: 1.45; margin: 0;
   padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); padding-block: max(12px, env(safe-area-inset-top, 0px)) calc(96px + env(safe-area-inset-bottom, 0px)); -webkit-text-size-adjust: 100% }
 .panel { padding: 14px 12px }
 label.seau { flex-direction: row; align-items: center; font-size: 1rem }
@@ -69,7 +70,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 .champ, #es-sol, #es-perso { display: flex; flex-direction: column; gap: 10px }
 .seg-titre { font-weight: 600 }
-.seg-ico { grid-template-columns: repeat(3, 1fr) }
+.seg-ico { grid-auto-flow: column; grid-auto-columns: 1fr }
+.grid2 > label:has(> .seg-src) { grid-column: 1 / -1 }
 .seg-ico button { padding: 8px; text-align: center; display: grid; justify-items: center; gap: 2px }
 .seg-ico svg { width: 100%; max-width: 76px; height: auto; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
 .seg-ico small { font-size: .72rem; font-weight: 600 }
@@ -80,7 +82,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .es-adj { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: .9rem; min-width: 0 }
 label small { font-weight: 400; color: var(--muted) }
-input, select { font: inherit; font-size: 1.15rem; padding: 10px 12px; border: 2px solid var(--line); border-radius: 6px;
+input, select { font: inherit; font-size: 1.15rem; padding: 12px 12px; min-height: 52px; border: 2px solid var(--line); border-radius: 6px;
   background: var(--bg); color: var(--fg); width: 100%; font-variant-numeric: tabular-nums }
 .result { border: 2px solid var(--accent); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px }
 .result .big { font-family: var(--f-display); font-size: 2.4rem; line-height: 1; color: var(--accent) }
@@ -187,7 +189,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Peigne <small>selon le carreau</small>
         <select id="colle-peigne"></select></label>
       <label>Double encollage <small>grand format, extérieur</small>
-        <select id="colle-double"><option value="0">Non</option><option value="1">Oui</option></select></label>
+        <select id="colle-double" class="seg-src"><option value="0">Non</option><option value="1">Oui</option></select></label>
       <label>Sac <small>kg</small><input id="colle-sac" type="number" inputmode="decimal"></label>
       <label>Eau par sac <small>litres</small><input id="colle-eau" type="number" inputmode="decimal" step="0.1"></label>
       <label>Marge de perte <small>%</small><input id="colle-marge" type="number" inputmode="decimal" value="10"></label>
@@ -203,7 +205,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <div class="grid2">
       <label>Surface <small>m²</small><input id="ca-surf" type="number" inputmode="decimal" value="20"></label>
       <label>Pose
-        <select id="ca-pose"><option value="10">Droite</option><option value="15">Décalée ou diagonale</option><option value="20">Chevron ou point de Hongrie</option></select></label>
+        <select id="ca-pose" class="seg-src" data-icons="1"><option value="10" data-ico="pdroite">Droite</option><option value="15" data-ico="pdiag" data-court="Diagonale">Décalée ou diagonale</option><option value="20" data-ico="pchevron" data-court="Chevron">Chevron ou point de Hongrie</option></select></label>
       <label>Carreau, longueur <small>cm</small><input id="ca-a" type="number" inputmode="decimal" value="60"></label>
       <label>Carreau, largeur <small>cm</small><input id="ca-b" type="number" inputmode="decimal" value="60"></label>
       <label>Marge de coupe <small>%</small><input id="ca-marge" type="number" inputmode="decimal" value="10"></label>
@@ -236,7 +238,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <section class="panel" id="p-semelle" hidden>
     <h2>Semelle en béton</h2>
     <label>Type
-      <select id="sem-type"><option value="filante">Filante (sous un mur)</option><option value="isolee">Isolée (sous un poteau)</option></select></label>
+      <select id="sem-type" class="seg-src" data-icons="1"><option value="filante" data-ico="sfil">Filante (sous un mur)</option><option value="isolee" data-ico="siso">Isolée (sous un poteau)</option></select></label>
     <div class="grid2">
       <label id="sem-l-lab">Longueur totale <small>m</small><input id="sem-l" type="number" inputmode="decimal" value="32"></label>
       <label>Largeur <small>cm</small><input id="sem-w" type="number" inputmode="decimal" value="50"></label>
@@ -247,7 +249,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Sac de ciment <small>kg</small>
         <select id="sem-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
       <label>Granulats
-        <select id="sem-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
+        <select id="sem-gran" class="seg-src"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
       <label>Marge de perte <small>%</small><input id="sem-marge" type="number" inputmode="decimal" value="10"></label>
     </div>
     <div class="result" id="sem-res"></div>
@@ -265,7 +267,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Sac de ciment <small>kg</small>
         <select id="dal-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
       <label>Granulats
-        <select id="dal-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
+        <select id="dal-gran" class="seg-src"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
       <label>Marge de perte <small>%</small><input id="dal-marge" type="number" inputmode="decimal" value="10"></label>
     </div>
     <div class="result" id="dal-res"></div>
@@ -277,7 +279,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <h2>Chape</h2>
     <div class="grid2">
       <label>Fabrication
-        <select id="chape-mode"><option value="betonniere">Bétonnière (sacs)</option><option value="toupie">Toupie (m³)</option></select></label>
+        <select id="chape-mode" class="seg-src"><option value="betonniere">Bétonnière (sacs)</option><option value="toupie">Toupie (m³)</option></select></label>
       <label>Dosage ciment <small>kg/m³</small>
         <select id="chape-dos"><option value="250">250</option><option value="300">300</option><option value="350" selected>350</option></select></label>
       <label>Sac de ciment <small>kg</small>
@@ -328,7 +330,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Hauteur <small>m</small><input id="mur-h" type="number" inputmode="decimal" value="2.5"></label>
       <label>Ouvertures à déduire <small>m² (portes, fenêtres)</small><input id="mur-ouv" type="number" inputmode="decimal" value="6"></label>
       <label>Mortier
-        <select id="mur-mortier"><option value="fait">Fait sur place (ciment + sable)</option><option value="obra" data-info="Mortier prêt à gâcher en sac de 25 kg, vendu chez Chausson : 1 sac pour 0,5 m² de parpaings de 20, 3,5 L d'eau par sac.">Mortier OBRA M10 prêt à gâcher</option></select></label>
+        <select id="mur-mortier" class="seg-src"><option value="fait">Fait sur place (ciment + sable)</option><option value="obra" data-info="Mortier prêt à gâcher en sac de 25 kg, vendu chez Chausson : 1 sac pour 0,5 m² de parpaings de 20, 3,5 L d'eau par sac.">Mortier OBRA M10 prêt à gâcher</option></select></label>
       <label>Sac de ciment <small>kg</small>
         <select id="mur-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
       <label>Marge de casse <small>%</small><input id="mur-marge" type="number" inputmode="decimal" value="5"></label>
@@ -355,7 +357,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <section class="panel" id="p-escalier" hidden>
     <h2>Escalier en béton</h2>
     <div class="champ"><span class="seg-titre">Forme de l'escalier</span>
-      <select id="es-forme" class="seg-src" data-icons="1"><option value="droit">Droit</option><option value="quart">Quart tournant</option><option value="demi">Demi-tournant</option></select></div>
+      <select id="es-forme" class="seg-src" data-icons="1"><option value="droit" data-ico="droit">Droit</option><option value="quart" data-ico="quart">Quart tournant</option><option value="demi" data-ico="demi">Demi-tournant</option></select></div>
     <div class="champ" id="es-virage-box" hidden><span class="seg-titre">Dans le virage</span>
       <select id="es-virage" class="seg-src"><option value="palier">Un palier</option><option value="tournant">Des marches tournantes</option></select></div>
     <div class="grid2">
@@ -387,7 +389,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Sac de ciment <small>kg</small>
         <select id="es-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
       <label>Granulats
-        <select id="es-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
+        <select id="es-gran" class="seg-src"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
       <label>Marge de perte <small>%</small><input id="es-marge" type="number" inputmode="decimal" value="10"></label>
     </div>
     <div class="es-adj" id="es-adj-box" hidden><button type="button" class="btn" id="es-moins">− 1 marche</button><button type="button" class="btn" id="es-plus">+ 1 marche</button><input id="es-adj" type="hidden" value="0"></div>
@@ -419,7 +421,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <div class="grid2">
       <label>Aciers <select id="ou-ha"><option value="8">4 HA 8</option><option value="10" selected>4 HA 10</option><option value="12">4 HA 12</option></select></label>
       <label>Béton
-        <select id="ou-gran"><option value="mel">Ciment + mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
+        <select id="ou-gran" class="seg-src"><option value="mel">Ciment + mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
       <label>Sac de ciment <small>kg</small>
         <select id="ou-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
     </div>
@@ -439,7 +441,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Nombre de morceaux <small>poteaux ou longueurs droites</small><input id="po-n" type="number" inputmode="numeric" value="4"></label>
       <label>Recouvrement des cages <small>cm</small><input id="po-rec" type="number" inputmode="decimal" value="50"></label>
       <label>Béton
-        <select id="po-gran"><option value="mel">Ciment + mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
+        <select id="po-gran" class="seg-src"><option value="mel">Ciment + mélange à béton 0/20</option><option value="obra" data-info="Béton prêt à gâcher en sac de 25 kg, vendu chez Chausson : 84 sacs pour 1 m³, 3 L d'eau par sac.">Béton sec OBRA C25/30</option></select></label>
       <label>Sac de ciment <small>kg</small>
         <select id="po-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
     </div>
@@ -535,7 +537,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.13.2 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.14 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -583,8 +585,8 @@ const DEFAULTS = {
 // Nom court dans la liste, détail (fiche, eau...) affiché sous la liste
 Object.values(DEFAULTS).flat().forEach(p => { const m = p.nom.match(/^(.*?) \((.*)\)$/); if (m) { p.nom = m[1]; p.info = m[2].charAt(0).toUpperCase() + m[2].slice(1) + '.'; } });
 function majInfo(sel) {
-  let el = sel.nextElementSibling;
-  if (!el || !el.classList.contains('info-prod')) { el = document.createElement('small'); el.className = 'info-prod'; sel.after(el); }
+  const ancre = sel._seg || sel; let el = ancre.nextElementSibling;
+  if (!el || !el.classList.contains('info-prod')) { el = document.createElement('small'); el.className = 'info-prod'; ancre.after(el); }
   const o = sel.selectedOptions[0];
   el.textContent = (o && o.dataset.info) || ''; el.hidden = !el.textContent;
 }
@@ -822,19 +824,21 @@ function calcEscalier() {
     <h3 class="sous">Béton</h3>${betonHtml(vol, num('es-dos'), num('es-sac'), $('es-gran').value)}`;
 }
 // Choix en gros boutons (un par ligne) à la place d'un menu déroulant : le menu reste caché et garde la valeur
-// Formes d'escalier : petits plans vus de dessus, flèche dans le sens de la montée
-const ICONES = { droit: '<svg viewBox="0 0 60 60"><rect x="20" y="3" width="20" height="54"/><path d="M20 9H40M20 15H40M20 21H40M20 27H40M20 33H40M20 39H40M20 45H40M20 51H40" stroke-width="1"/><path d="M30 54V8M26 12l4-5 4 5"/></svg>', quart: '<svg viewBox="0 0 60 60"><path d="M5 57V3h52v20H25v34z"/><path d="M5 23h20V3" stroke-width="1"/><path d="M5 29H25M5 35H25M5 41H25M5 47H25M5 53H25M31 3V23M37 3V23M43 3V23M49 3V23M55 3V23" stroke-width="1"/><path d="M15 54V13h37M48 9l5 4-5 4"/></svg>', demi: '<svg viewBox="0 0 60 60"><path d="M4 57V3h52v54H34V23h-8v34z"/><path d="M4 23h22M34 23h22" stroke-width="1"/><path d="M4 29H26M4 35H26M4 41H26M4 47H26M4 53H26M34 29H56M34 35H56M34 41H56M34 47H56M34 53H56" stroke-width="1"/><path d="M15 54V13h30v41M41 50l4 5 4-5"/></svg>' };
-function majSeg(sel) { sel.nextElementSibling.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === sel.value)); }
+// Petits plans vus de dessus : formes d'escalier (flèche dans le sens de la montée), poses de carrelage, semelles
+const ICONES = { pdroite: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V54M38 6V54" stroke-width="1.5"/></svg>', pdiag: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30L30 6M6 54L54 6M30 54L54 30M6 30L30 54M6 6L54 54M30 6L54 30" stroke-width="1.5"/></svg>', pchevron: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 18L18 8L30 18L42 8L54 18M6 30L18 20L30 30L42 20L54 30M6 42L18 32L30 42L42 32L54 42M6 54L18 44L30 54L42 44L54 54" stroke-width="1.5"/></svg>', sfil: '<svg viewBox="0 0 60 60"><rect x="4" y="20" width="52" height="20"/><rect x="4" y="26" width="52" height="8" stroke-width="1.5"/><path d="M10 34l8-8M18 34l8-8M26 34l8-8M34 34l8-8M42 34l8-8" stroke-width="1"/></svg>', siso: '<svg viewBox="0 0 60 60"><rect x="12" y="12" width="36" height="36"/><rect x="24" y="24" width="12" height="12" stroke-width="1.5"/><path d="M24 32l4-4M28 36l8-8M32 36l4-4" stroke-width="1"/></svg>', droit: '<svg viewBox="0 0 60 60"><rect x="20" y="3" width="20" height="54"/><path d="M20 9H40M20 15H40M20 21H40M20 27H40M20 33H40M20 39H40M20 45H40M20 51H40" stroke-width="1"/><path d="M30 54V8M26 12l4-5 4 5"/></svg>', quart: '<svg viewBox="0 0 60 60"><path d="M5 57V3h52v20H25v34z"/><path d="M5 23h20V3" stroke-width="1"/><path d="M5 29H25M5 35H25M5 41H25M5 47H25M5 53H25M31 3V23M37 3V23M43 3V23M49 3V23M55 3V23" stroke-width="1"/><path d="M15 54V13h37M48 9l5 4-5 4"/></svg>', demi: '<svg viewBox="0 0 60 60"><path d="M4 57V3h52v54H34V23h-8v34z"/><path d="M4 23h22M34 23h22" stroke-width="1"/><path d="M4 29H26M4 35H26M4 41H26M4 47H26M4 53H26M34 29H56M34 35H56M34 41H56M34 47H56M34 53H56" stroke-width="1"/><path d="M15 54V13h30v41M41 50l4 5 4-5"/></svg>' };
+function majSeg(sel) { sel._seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === sel.value)); }
 document.querySelectorAll('.seg-src').forEach(sel => {
   const box = document.createElement('div'); box.className = 'seg' + (sel.dataset.icons ? ' seg-ico' : '');
   [...sel.options].forEach(o => {
     const b = document.createElement('button'); b.type = 'button'; b.dataset.v = o.value;
-    if (sel.dataset.icons) { b.innerHTML = ICONES[o.value] + `<small>${o.textContent.split(' (')[0]}</small>`; b.setAttribute('aria-label', o.textContent); } else b.textContent = o.textContent;
-    b.addEventListener('click', () => { sel.value = o.value; sel.dispatchEvent(new Event('input', { bubbles: true })); });
+    if (sel.dataset.icons) { b.innerHTML = ICONES[o.dataset.ico] + `<small>${o.dataset.court || o.textContent.split(' (')[0]}</small>`; b.setAttribute('aria-label', o.textContent); } else b.textContent = o.textContent;
+    b.addEventListener('click', () => { sel.value = o.value; ['input', 'change'].forEach(t => sel.dispatchEvent(new Event(t, { bubbles: true }))); });
     box.append(b);
   });
-  sel.hidden = true; sel.after(box); majSeg(sel);
+  sel.hidden = true; sel.after(box); sel._seg = box; majSeg(sel);
 });
+const majSegs = () => document.querySelectorAll('.seg-src').forEach(majSeg);
+document.addEventListener('input', majSegs);
 // Ouverture dans un mur : linteau (portée + appuis) et jambages coulés sur toute l'épaisseur
 function calcOuverture() {
   const ha = num('ou-ha');
@@ -1100,7 +1104,7 @@ $('sv-restaurer').addEventListener('click', () => {
   save(); savePoss(); saveListe();
   refresh(); remet('crepi-prod'); remet('colle-prod'); applyProduct('crepi'); applyProduct('colle');
   CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
-  saveChamps(); Object.keys(CALCS).forEach(k => { renderPoss(k); CALCS[k](); }); renderListe();
+  saveChamps(); majSegs(); Object.keys(CALCS).forEach(k => { renderPoss(k); CALCS[k](); }); renderListe();
   msg.textContent = 'Sauvegarde restaurée.'; $('sv-coller').value = '';
 });
 // Compteur d'utilisation, gardé dans le téléphone : ne part que dans un avis envoyé par l'utilisateur
@@ -1199,7 +1203,7 @@ Object.keys(CALCS).forEach(key => {
     if (key === 'crepi' || key === 'colle') { mets(key + '-prod'); applyProduct(key); }
     Object.keys(ch).forEach(mets);
     if (key === 'granulats') { /* densité et tassement viennent de la possibilité */ }
-    CALCS[key](); saveChamps();
+    majSegs(); CALCS[key](); saveChamps();
   });
   $('poss-del-' + key).addEventListener('click', () => {
     const i = $('poss-' + key).value; if (i === '') return;
@@ -1235,6 +1239,7 @@ SEL_INFO.forEach(id => { $(id).addEventListener('change', () => majInfo($(id)));
 try { const v = localStorage.getItem('gachee-vue'); if (v && $('v-' + v)) vue(v); } catch (e) {}
 demarre = true;
 // Mode hors ligne (ignoré là où ce n'est pas possible)
+majSegs(); // boutons à jour après le rappel des champs enregistrés
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 
