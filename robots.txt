@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://miradorventus.github.io/Le-bon-dosage/sitemap.xml
