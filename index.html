@@ -463,7 +463,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.10.4 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.10.5 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -484,9 +484,9 @@ const PEIGNES_COURANTS = [{ l: '6 mm', s: 3, d: 4.5 }, { l: '8 mm', s: 4, d: 5.5
 const DEFAULTS = {
   crepi: [
     { id: 'def-pralf', nom: 'Weber.pral F (monocouche grain fin OC2, sac de 25 kg ; 3,7 à 4,7 L d\'eau ; 23 kg/m² en 15 mm, selon la finition)', sac: 25, eau: 4.2, conso: 1.53 },
-    // weberlite F et G (remplacent weberlite HR), Point P 17/10/2026. F : fiche Point P (gratté 22 kg/m² ≈ 15 mm). G : eau du sac, consommation indicative
+    // weberlite F et G (remplacent weberlite HR), Point P 17/10/2026. F : fiche Point P (gratté 22 kg/m² ≈ 15 mm). G : idem (fiche Point P)
     { id: 'def-litef', nom: 'Weberlite F (semi-allégé grain fin, sac de 25 kg ; 4,8 à 5,8 L d\'eau ; sur maçonnerie 18 à 20 kg/m² taloché ou rustique, 21 à 23 kg/m² gratté)', sac: 25, eau: 5.3, conso: 1.47 },
-    { id: 'def-liteg', nom: 'Weberlite G (semi-allégé grain moyen OC1, sac de 25 kg ; 5 à 6 L d\'eau ; consommation indicative)', sac: 25, eau: 5.5, conso: 1.3 },
+    { id: 'def-liteg', nom: 'Weberlite G (semi-allégé grain moyen OC1, sac de 25 kg ; 5 à 6 L d\'eau ; sur maçonnerie 18 à 20 kg/m² taloché ou rustique, 21 à 23 kg/m² gratté)', sac: 25, eau: 5.5, conso: 1.47 },
     // Fiches techniques vendues chez Chausson (relevées le 17/10/2026) : eau = milieu de la fourchette
     { id: 'def-parexi', nom: 'ParexLanko PAREXI (monocouche lourd OC3, sac de 30 kg ; fiche : 1,6 kg/m² par mm, eau 4,5 à 5,4 L)', sac: 30, eau: 5, conso: 1.6 },
     { id: 'def-monorex', nom: 'ParexLanko MONOREX GF (monocouche semi-allégé ; fiche : 1,3 kg/m² par mm, eau 5,3 à 6,3 L)', sac: 25, eau: 5.8, conso: 1.3 },
