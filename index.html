@@ -52,7 +52,12 @@ label.seau { flex-direction: row; align-items: center; font-size: 1rem }
 .wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px }
 header h1 { font-family: var(--f-display); font-size: 2.2rem; margin: 0; letter-spacing: .02em; line-height: 1 }
 header p { margin: 4px 0 0; color: var(--muted); font-size: .95rem }
-.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: -6px }
+.cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px }
+.cats button { font-family: var(--f-display); font-size: 1.05rem; line-height: 1.1; letter-spacing: .02em; padding: 12px 4px; min-height: 56px;
+  border: 2px solid var(--accent); background: transparent; color: var(--accent); border-radius: 8px; cursor: pointer }
+.cats button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg) }
+.tabs button { background: var(--bg) }
 .seau { display: flex; align-items: center; gap: 10px; font-weight: 600 }
 .seau input { width: 5.5em }
 .tabs button { font-family: var(--f-display); font-size: 1.1rem; letter-spacing: .03em; text-transform: uppercase;
@@ -122,18 +127,24 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   </header>
 
   <main class="vue" id="v-calculs">
+  <nav class="cats" aria-label="Catégories">
+    <button data-cat="beton" aria-pressed="true">Béton</button>
+    <button data-cat="sols" aria-pressed="false">Sols</button>
+    <button data-cat="murs" aria-pressed="false">Murs et façade</button>
+    <button data-cat="carrelage" aria-pressed="false">Carrelage</button>
+  </nav>
   <nav class="tabs" role="tablist">
-    <button role="tab" id="t-crepi" aria-selected="true" data-tab="crepi">Crépi</button>
-    <button role="tab" id="t-colle" aria-selected="false" data-tab="colle">Colle</button>
-    <button role="tab" id="t-joints" aria-selected="false" data-tab="joints">Joints</button>
-    <button role="tab" id="t-semelle" aria-selected="false" data-tab="semelle">Semelle</button>
-    <button role="tab" id="t-dalle" aria-selected="false" data-tab="dalle">Dalle</button>
-    <button role="tab" id="t-chape" aria-selected="false" data-tab="chape">Chape</button>
-    <button role="tab" id="t-granulats" aria-selected="false" data-tab="granulats">Granulats</button>
-    <button role="tab" id="t-mur" aria-selected="false" data-tab="mur">Parpaings</button>
-    <button role="tab" id="t-treillis" aria-selected="false" data-tab="treillis">Treillis</button>
-    <button role="tab" id="t-poteau" aria-selected="false" data-tab="poteau">Poteaux</button>
-    <button role="tab" id="t-ouverture" aria-selected="false" data-tab="ouverture">Ouverture</button>
+    <button role="tab" id="t-crepi" aria-selected="true" data-tab="crepi" data-cat="murs">Crépi</button>
+    <button role="tab" id="t-colle" aria-selected="false" data-tab="colle" data-cat="carrelage">Colle</button>
+    <button role="tab" id="t-joints" aria-selected="false" data-tab="joints" data-cat="carrelage">Joints</button>
+    <button role="tab" id="t-semelle" aria-selected="false" data-tab="semelle" data-cat="beton">Semelle</button>
+    <button role="tab" id="t-dalle" aria-selected="false" data-tab="dalle" data-cat="beton">Dalle</button>
+    <button role="tab" id="t-chape" aria-selected="false" data-tab="chape" data-cat="sols">Chape</button>
+    <button role="tab" id="t-granulats" aria-selected="false" data-tab="granulats" data-cat="sols">Granulats</button>
+    <button role="tab" id="t-mur" aria-selected="false" data-tab="mur" data-cat="murs">Parpaings</button>
+    <button role="tab" id="t-treillis" aria-selected="false" data-tab="treillis" data-cat="beton">Treillis</button>
+    <button role="tab" id="t-poteau" aria-selected="false" data-tab="poteau" data-cat="beton">Poteaux</button>
+    <button role="tab" id="t-ouverture" aria-selected="false" data-tab="ouverture" data-cat="beton">Ouverture</button>
   </nav>
 
   <label class="seau" for="seau">Mon seau fait <input id="seau" type="number" inputmode="decimal" value="10"> litres</label>
@@ -452,7 +463,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.9 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.10 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -817,7 +828,20 @@ document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click
   document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b));
   ['crepi', 'colle', 'joints', 'semelle', 'dalle', 'chape', 'granulats', 'mur', 'treillis', 'poteau', 'ouverture'].forEach(t => $('p-' + t).hidden = t !== b.dataset.tab);
   try { localStorage.setItem('gachee-onglet', b.dataset.tab); } catch (e) {}
-  if (demarre) $('p-' + b.dataset.tab).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  montreCat(b.dataset.cat);
+  try { localStorage.setItem('gachee-onglet-' + b.dataset.cat, b.dataset.tab); } catch (e) {}
+  if (demarre && !parCat) $('p-' + b.dataset.tab).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}));
+// Catégories : n'affichent que leurs calculs ; on rouvre le dernier calcul utilisé de la catégorie
+let parCat = false;
+function montreCat(c) {
+  document.querySelectorAll('.cats button').forEach(x => x.setAttribute('aria-pressed', x.dataset.cat === c));
+  document.querySelectorAll('.tabs button').forEach(x => { x.hidden = x.dataset.cat !== c; });
+}
+document.querySelectorAll('.cats button').forEach(b => b.addEventListener('click', () => {
+  let t = null; try { t = localStorage.getItem('gachee-onglet-' + b.dataset.cat); } catch (e) {}
+  const btn = (t && document.querySelector(`.tabs button[data-tab="${t}"]`)) || document.querySelector(`.tabs button[data-cat="${b.dataset.cat}"]`);
+  parCat = true; btn.click(); parCat = false;
 }));
 // Vues de la barre du bas : une seule visible à la fois
 let demarre = false;
@@ -1056,6 +1080,7 @@ remet('crepi-prod'); remet('colle-prod');
 applyProduct('crepi'); applyProduct('colle');
 CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
 try { const o = localStorage.getItem('gachee-onglet'); const b = o && document.querySelector(`.tabs button[data-tab="${o}"]`); if (b) b.click(); } catch (e) {}
+montreCat(document.querySelector('.tabs button[aria-selected="true"]').dataset.cat);
 calcCrepi(); calcColle(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau(); calcOuverture();
 renderListe();
 const SEL_INFO = ['crepi-prod', 'colle-prod', 'jo-prod', 'mur-mortier', 'sem-gran', 'dal-gran', 'po-gran', 'ou-gran'];
