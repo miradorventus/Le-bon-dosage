@@ -2,7 +2,7 @@
 
 Calculs de chantier pour maçons, sur le téléphone : combien de sacs, de seaux d'eau, de m³ ou de tonnes pour un chantier de maison individuelle.
 
-**Version 0.10 (prototype)** · fait avec un maçon, pour de vrais chantiers.
+**Version 0.10.1 (prototype)** · fait avec un maçon, pour de vrais chantiers.
 
 ## Ce qu'elle calcule
 - **Crépi / enduit** : sacs et eau, avec les valeurs des fiches Weber (pral F, lite HR) ou tes propres produits.
