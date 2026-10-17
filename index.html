@@ -182,7 +182,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Sac de ciment <small>kg</small>
         <select id="sem-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
       <label>Granulats
-        <select id="sem-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option></select></label>
+        <select id="sem-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra">Béton sec OBRA C25/30, sac 25 kg (Chausson)</option></select></label>
       <label>Marge de perte <small>%</small><input id="sem-marge" type="number" inputmode="decimal" value="10"></label>
     </div>
     <div class="result" id="sem-res"></div>
@@ -200,7 +200,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Sac de ciment <small>kg</small>
         <select id="dal-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
       <label>Granulats
-        <select id="dal-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option></select></label>
+        <select id="dal-gran"><option value="sg">Sable + gravier</option><option value="mel">Mélange à béton 0/20</option><option value="obra">Béton sec OBRA C25/30, sac 25 kg (Chausson)</option></select></label>
       <label>Marge de perte <small>%</small><input id="dal-marge" type="number" inputmode="decimal" value="10"></label>
     </div>
     <div class="result" id="dal-res"></div>
@@ -297,6 +297,8 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <label>Longueur totale <small>m (tous poteaux ou chaînages)</small><input id="po-l" type="number" inputmode="decimal" value="30"></label>
       <label>Nombre de morceaux <small>poteaux ou longueurs droites</small><input id="po-n" type="number" inputmode="numeric" value="4"></label>
       <label>Recouvrement des cages <small>cm</small><input id="po-rec" type="number" inputmode="decimal" value="50"></label>
+      <label>Béton
+        <select id="po-gran"><option value="mel">Ciment + mélange à béton 0/20</option><option value="obra">Béton sec OBRA C25/30, sac 25 kg (Chausson)</option></select></label>
       <label>Sac de ciment <small>kg</small>
         <select id="po-sac"><option value="25">25 (Lafarge CEM II)</option><option value="35" selected>35 (Lafarge CEM II)</option></select></label>
     </div>
@@ -480,11 +482,13 @@ function calcSemelle() {
   $('sem-l-lab').firstChild.textContent = iso ? 'Longueur ' : 'Longueur totale ';
   const n = iso ? Math.max(1, Math.round(num('sem-n'))) : 1;
   const vol = num('sem-l') * num('sem-w') / 100 * num('sem-h') / 100 * n * (1 + num('sem-marge') / 100);
+  $('sem-dos').parentElement.hidden = $('sem-sac').parentElement.hidden = $('sem-gran').value === 'obra';
   ACHATS.semelle = { titre: `Semelle ${iso ? 'isolée' : 'filante'} : ${fmt(vol, 2)} m³`, items: betonAchats(vol, num('sem-dos'), num('sem-sac'), $('sem-gran').value) };
   $('sem-res').innerHTML = betonHtml(vol, num('sem-dos'), num('sem-sac'), $('sem-gran').value);
 }
 function calcDalle() {
   const vol = num('dal-surf') * num('dal-ep') / 100 * (1 + num('dal-marge') / 100);
+  $('dal-dos').parentElement.hidden = $('dal-sac').parentElement.hidden = $('dal-gran').value === 'obra';
   ACHATS.dalle = { titre: `Dalle : ${fmt(num('dal-surf'), 1)} m² en ${fmt(num('dal-ep'), 0)} cm`, items: betonAchats(vol, num('dal-dos'), num('dal-sac'), $('dal-gran').value) };
   $('dal-res').innerHTML = betonHtml(vol, num('dal-dos'), num('dal-sac'), $('dal-gran').value);
 }
@@ -492,7 +496,19 @@ function calcDalle() {
 const ACHATS = {};
 const r2 = x => Math.round(x * 100) / 100;
 const nomCourt = nom => nom.replace(/\s*\(.*\)$/, '');
+// Fiche OBRA béton sec C25/30 (Chausson) : 84 sacs de 25 kg pour 1 m³, 3 L d'eau par sac
+const OBRA_SACS_M3 = 84, OBRA_EAU = 3;
+function obraHtml(vol) {
+  const sacs = Math.ceil(vol * OBRA_SACS_M3);
+  return `<div class="big">${sacs} <span>sacs OBRA C25/30</span></div>
+    <dl class="rows"><dt>Béton</dt><dd>${fmt(vol, 2)} m³</dd>
+    <dt>Eau par sac</dt><dd>3 L</dd>
+    <dt>Eau en tout</dt><dd>${eauTxt(sacs * OBRA_EAU)}</dd>
+    <dt>Brouettes de 60 L</dt><dd>≈ ${Math.ceil(vol * 1000 / 60)}</dd></dl>
+    <div class="note">Fiche OBRA : 84 sacs de 25 kg pour 1 m³, 3 L d'eau par sac, sans excès. Pratique pour les petits volumes ; au-delà de 1 m³, compare avec le ciment + granulats ou la toupie.</div>`;
+}
 function betonAchats(vol, dos, sac, gran) {
+  if (gran === 'obra') return [['Béton sec OBRA C25/30', Math.ceil(vol * OBRA_SACS_M3), 'sacs de 25 kg']];
   const it = [['Ciment Lafarge', Math.ceil(vol * dos / sac), `sacs de ${sac} kg`]];
   if (gran === 'mel') it.push(['Mélange à béton 0/20', r2(vol), 'm³']);
   else it.push(['Sable 0/4', r2(vol * 0.5), 'm³'], ['Gravier 4/20', r2(vol * 0.7), 'm³']);
@@ -501,6 +517,7 @@ function betonAchats(vol, dos, sac, gran) {
 // Recette fiche Lafarge « L'Original » : 1 sac de 35 kg (350 kg/m³) = 5 seaux de sable 0/4 + 7 seaux de gravillons 4/20,
 // ou 10 seaux de mélange à béton 0/20, + ~17 L d'eau, pour ~100 L de béton. Soit par m³ : 0,5 sable + 0,7 gravier, ou 1 m³ de 0/20.
 function betonHtml(vol, dos, sac, gran) {
+  if (gran === 'obra') return obraHtml(vol);
   const ciment = vol * dos, eau = vol * dos * 0.49;
   const parSac = sac / dos * 1000 / (num('seau') || 10); // en seaux, pour un sac
   const granRows = gran === 'mel'
@@ -605,13 +622,17 @@ function calcPoteau() {
   const vol = sec * sec * L * 1.1, sac = num('po-sac');
   const parMorceau = L / n;
   const cages = n * Math.max(1, Math.ceil((parMorceau - r) / (6 - r)));
+  const obra = $('po-gran').value === 'obra';
+  $('po-sac').parentElement.hidden = obra;
   ACHATS.poteau = { titre: `Poteaux / chaînages : ${fmt(L, 1)} m`, items: [[`Cage ${num('po-sec')}x${num('po-sec')} 4 HA ${num('po-ha')}, 6 m`, cages, 'pièces'], ['Ciment Lafarge', Math.ceil(vol * 350 / sac), `sacs de ${sac} kg`], ['Mélange à béton 0/20', r2(vol), 'm³']] };
+  if (obra) ACHATS.poteau.items.splice(1, 2, ['Béton sec OBRA C25/30', Math.ceil(vol * OBRA_SACS_M3), 'sacs de 25 kg']);
   const kgM = { 6: 0.222, 8: 0.395, 10: 0.617, 12: 0.888 }[num('po-ha')] * 4; // poids des 4 filants par mètre
   $('po-res').innerHTML = `<div class="big">${cages} <span>cages de 6 m (4 HA ${num('po-ha')}, ${num('po-sec')}x${num('po-sec')})</span></div>
     <dl class="rows"><dt>Béton</dt><dd>${fmt(vol * 1000, 0)} L (${fmt(vol, 2)} m³)</dd>
-    <dt>Ciment (350 kg/m³)</dt><dd>${Math.ceil(vol * 350 / sac)} sacs de ${sac} kg</dd>
+    ${obra ? `<dt>Béton sec OBRA C25/30</dt><dd>${Math.ceil(vol * OBRA_SACS_M3)} sacs de 25 kg</dd>
+    <dt>Eau</dt><dd>3 L par sac, ${eauTxt(Math.ceil(vol * OBRA_SACS_M3) * OBRA_EAU)} en tout</dd>` : `<dt>Ciment (350 kg/m³)</dt><dd>${Math.ceil(vol * 350 / sac)} sacs de ${sac} kg</dd>
     <dt>Mélange à béton 0/20</dt><dd>${fmt(vol, 2)} m³</dd>
-    <dt>Eau en tout</dt><dd>${eauTxt(vol * 350 * 0.49)}</dd>
+    <dt>Eau en tout</dt><dd>${eauTxt(vol * 350 * 0.49)}</dd>`}
     <dt>Poids des filants</dt><dd>≈ ${fmt(kgM * cages * 6, 0)} kg</dd></dl>
     <div class="note">Pour les angles et les jonctions poteau-chaînage, ajoute des équerres. Le diamètre des aciers se décide sur plan.</div>`;
 }
