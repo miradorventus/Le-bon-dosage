@@ -23,7 +23,7 @@ L'eau est donnée **en seaux** (taille du seau réglable), et **par sac**.
 - **Sauvegarde** dans Notes et restauration.
 
 ## Respect de tes données
-Aucun compte, aucune pub, aucun pistage. Tout reste dans ton téléphone. Rien ne sort de l'appli sans que tu appuies toi-même sur « Partager ».
+Aucun compte, aucune pub, aucun cookie. Tes calculs, tes produits et ta liste restent dans ton téléphone : rien n'en sort sans que tu appuies toi-même sur « Partager ». Seul un compteur de visites anonyme ([GoatCounter](https://www.goatcounter.com), sans cookies) compte les ouvertures de la page, pour savoir si l'appli sert.
 
 ## Installer l'appli
 Il faut du réseau seulement la première fois. Ensuite, elle marche sans réseau.

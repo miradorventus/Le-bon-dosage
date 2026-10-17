@@ -115,7 +115,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
 <div class="wrap">
   <header>
     <h1>Le Bon Dosage</h1>
-    <p>Calculs de chantier pour le maçon. Rien ne quitte ce téléphone.</p>
+    <p>Calculs de chantier pour le maçon. Tes calculs restent dans ce téléphone.</p>
   </header>
 
   <main class="vue" id="v-calculs">
@@ -385,10 +385,10 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <li><strong>Nombre de parpaings et briques</strong> et mortier de montage.</li>
       <li><strong>Treillis soudé</strong> (PAF, ST 25 C...), <strong>ferraillage des poteaux et chaînages</strong>, <strong>castine, sable, gravier</strong> en tonnes.</li>
     </ul>
-    <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans pistage. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
+    <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.9 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Aucune donnée ne quitte ce téléphone.</footer>
+  <footer>Version 0.9 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -901,3 +901,6 @@ demarre = true;
 // Mode hors ligne (ignoré là où ce n'est pas possible)
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
+
+<!-- Compteur de visites anonyme, sans cookies : https://www.goatcounter.com -->
+<script data-goatcounter="https://lebondosage.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
