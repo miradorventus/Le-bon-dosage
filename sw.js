@@ -1,6 +1,6 @@
 // Garde l'appli dans le téléphone pour qu'elle marche sans réseau.
 // Changer VERSION à chaque mise à jour pour que les téléphones la récupèrent.
-const VERSION = 'bon-dosage-0.9.0';
+const VERSION = 'bon-dosage-0.9.1';
 const FICHIERS = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
