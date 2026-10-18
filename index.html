@@ -85,6 +85,7 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .seg button[aria-pressed="true"] svg { stroke: var(--accent) }
 .autre { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 2px dashed var(--line); border-radius: 8px }
 .autre .btn { text-align: center; text-decoration: none }
+.partage a { color: var(--accent); font-weight: 600 }
 .es-adj { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: .9rem; min-width: 0 }
 label small { font-weight: 400; color: var(--muted) }
@@ -177,8 +178,8 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <div class="autre" id="crepi-autre" hidden>
       <label>Nom du produit <small>marque + nom sur le sac</small><input id="crepi-autre-nom" type="text"></label>
       <small class="info-prod">Recopie ce qui est écrit sur le sac dans les cases Sac, Eau par sac et Consommation, plus bas.</small>
-      <div class="es-adj"><button type="button" class="btn" id="crepi-garder">Garder ce produit</button><a class="btn" id="crepi-partager" href="#">Partager avec la communauté</a></div>
-      <small class="info-prod">Prépare un mail avec ces chiffres : le produit sera ajouté à l'appli pour tous les maçons. Rien ne part sans toi.</small>
+      <button type="button" class="btn solid" id="crepi-garder">Garder ce produit dans ma liste</button>
+      <small class="info-prod partage">Pour que tous les maçons l'aient : <a id="crepi-partager" href="#">partager avec la communauté</a> (ça prépare un mail, rien ne part sans toi).</small>
     </div>
     <div class="grid2">
       <label>Surface <small>m²</small><input id="crepi-surf" type="number" inputmode="decimal" value="45"></label>
@@ -199,8 +200,8 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <div class="autre" id="colle-autre" hidden>
       <label>Nom du produit <small>marque + nom sur le sac</small><input id="colle-autre-nom" type="text"></label>
       <small class="info-prod">Recopie ce qui est écrit sur le sac dans les cases Sac et Eau par sac, plus bas.</small>
-      <div class="es-adj"><button type="button" class="btn" id="colle-garder">Garder ce produit</button><a class="btn" id="colle-partager" href="#">Partager avec la communauté</a></div>
-      <small class="info-prod">Prépare un mail avec ces chiffres : le produit sera ajouté à l'appli pour tous les maçons. Rien ne part sans toi.</small>
+      <button type="button" class="btn solid" id="colle-garder">Garder ce produit dans ma liste</button>
+      <small class="info-prod partage">Pour que tous les maçons l'aient : <a id="colle-partager" href="#">partager avec la communauté</a> (ça prépare un mail, rien ne part sans toi).</small>
     </div>
     <div class="grid2">
       <label>Surface <small>m²</small><input id="colle-surf" type="number" inputmode="decimal" value="20"></label>
@@ -248,8 +249,8 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
         <label>Eau par sac <small>litres</small><input id="jo-eau" type="number" inputmode="decimal" step="0.1" value="6"></label>
       </div>
       <small class="info-prod">Recopie ce qui est écrit sur le sac.</small>
-      <div class="es-adj"><a class="btn" id="jo-partager" href="#">Partager avec la communauté</a></div>
-      <small class="info-prod">Prépare un mail avec ces chiffres : le produit sera ajouté à l'appli pour tous les maçons. Rien ne part sans toi.</small>
+      <button type="button" class="btn solid" id="jo-garder">Garder ce produit dans ma liste</button>
+      <small class="info-prod partage">Pour que tous les maçons l'aient : <a id="jo-partager" href="#">partager avec la communauté</a> (ça prépare un mail, rien ne part sans toi).</small>
     </div>
     <div class="grid2">
       <label>Surface <small>m²</small><input id="jo-surf" type="number" inputmode="decimal" value="20"></label>
@@ -569,7 +570,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.16 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.16.1 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -999,9 +1000,20 @@ function calcChape() {
 }
 
 function renderList() {
-  $('np-list').innerHTML = produits.map(p => `<li><span>${p.nom.replace(/</g, '&lt;')}<small>${p.type === 'crepi' ? 'Crépi' : 'Colle'} · sac ${fmt(p.sac)} kg · eau ${fmt(p.eau)} L${p.type === 'crepi' ? ' · ' + fmt(p.conso) + ' kg/m²/mm' : ''}</small></span><button data-del="${p.id}">Supprimer</button></li>`).join('');
+  $('np-list').innerHTML = produits.map(p => `<li><span>${p.nom.replace(/</g, '&lt;')}<small>${{ crepi: 'Crépi', colle: 'Colle', jo: 'Joint' }[p.type]} · sac ${fmt(p.sac)} kg · eau ${fmt(p.eau)} L${p.type === 'crepi' ? ' · ' + fmt(p.conso) + ' kg/m²/mm' : ''}</small></span><button data-del="${p.id}">Supprimer</button></li>`).join('');
 }
-function refresh() { fillSelect('crepi'); fillSelect('colle'); renderList(); }
+// Joints gardés : ajoutés au menu des joints, juste avant « Autre produit… »
+function fillJoints() {
+  const sel = $('jo-prod'), cur = sel.value;
+  sel.querySelectorAll('option[data-perso]').forEach(o => o.remove());
+  produits.filter(p => p.type === 'jo').forEach(p => {
+    const o = new Option(p.nom, `${p.sac}|${p.eau}|`); o.dataset.perso = p.id; o.dataset.info = `Mon produit : sac de ${fmt(p.sac)} kg, ${fmt(p.eau)} L d'eau.`;
+    sel.insertBefore(o, sel.querySelector('option[value="autre"]'));
+  });
+  if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+  majInfo(sel);
+}
+function refresh() { fillSelect('crepi'); fillSelect('colle'); fillJoints(); renderList(); }
 
 $('np-type').addEventListener('change', () => { $('np-conso-lab').hidden = $('np-type').value !== 'crepi'; });
 $('np-add').addEventListener('click', () => {
@@ -1021,6 +1033,13 @@ $('np-add').addEventListener('click', () => {
   produits.unshift(p); save(); refresh(); $(t + '-prod').value = p.id; $(t + '-autre-nom').value = '';
   applyProduct(t); t === 'crepi' ? calcCrepi() : calcColle(); saveChamps();
 }));
+$('jo-garder').addEventListener('click', () => {
+  const nom = $('jo-autre-nom').value.trim();
+  if (!nom || !num('jo-sac')) { $('jo-autre-nom').focus(); return; }
+  const p = { id: 'p' + Date.now(), nom, type: 'jo', sac: num('jo-sac'), eau: num('jo-eau'), conso: 0 };
+  produits.unshift(p); save(); refresh(); $('jo-prod').value = `${p.sac}|${p.eau}|`; $('jo-autre-nom').value = '';
+  majInfo($('jo-prod')); majSegs(); calcJoints(); saveChamps();
+});
 ['crepi', 'colle', 'jo'].forEach(t => $(t + '-partager').addEventListener('click', () => {
   const type = { crepi: 'Crépi / enduit', colle: 'Colle à carrelage', jo: 'Joint de carrelage' }[t];
   const lignes = [`Type : ${type}`, `Produit : ${$(t + '-autre-nom').value.trim() || '?'}`, `Sac : ${fmt(num(t + '-sac'))} kg`, `Eau par sac : ${fmt(num(t + '-eau'))} L`];
@@ -1031,7 +1050,7 @@ $('np-add').addEventListener('click', () => {
 $('np-list').addEventListener('click', e => {
   const id = e.target.dataset.del; if (!id) return;
   produits = produits.filter(p => p.id !== id); save(); refresh();
-  applyProduct('crepi'); applyProduct('colle'); calcCrepi(); calcColle();
+  applyProduct('crepi'); applyProduct('colle'); calcCrepi(); calcColle(); calcJoints();
 });
 
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
