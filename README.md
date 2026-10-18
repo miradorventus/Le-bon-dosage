@@ -4,7 +4,7 @@ Calculs de chantier pour maçons, sur le téléphone : combien de sacs, de seaux
 
 👉 **Ouvrir l'appli : [miradorventus.github.io/Le-bon-dosage](https://miradorventus.github.io/Le-bon-dosage/)** (gratuite, sans compte, marche hors ligne)
 
-**Version 0.15 (prototype)** · fait avec un maçon, pour de vrais chantiers.
+**Version 0.16 (prototype)** · fait avec un maçon, pour de vrais chantiers.
 
 ## Ce qu'elle calcule
 - **Crépi / enduit** : sacs et eau, avec les valeurs des fiches Weber (pral F, weberlite F et G), ParexLanko ou tes propres produits.

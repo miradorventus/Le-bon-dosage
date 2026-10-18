@@ -83,6 +83,8 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .seg button { font: inherit; font-weight: 600; padding: 12px 14px; border: 2px solid var(--accent); border-radius: 6px; background: transparent; color: var(--accent); text-align: left; cursor: pointer }
 .seg button[aria-pressed="true"] { background: var(--choix); color: var(--fg); border-width: 3px; box-shadow: inset 0 0 0 1px var(--accent) }
 .seg button[aria-pressed="true"] svg { stroke: var(--accent) }
+.autre { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 2px dashed var(--line); border-radius: 8px }
+.autre .btn { text-align: center; text-decoration: none }
 .es-adj { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: .9rem; min-width: 0 }
 label small { font-weight: 400; color: var(--muted) }
@@ -172,6 +174,12 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <section class="panel" id="p-crepi">
     <h2>Crépi / enduit de façade</h2>
     <label>Produit <select id="crepi-prod"></select></label>
+    <div class="autre" id="crepi-autre" hidden>
+      <label>Nom du produit <small>marque + nom sur le sac</small><input id="crepi-autre-nom" type="text"></label>
+      <small class="info-prod">Recopie ce qui est écrit sur le sac dans les cases ci-dessous.</small>
+      <div class="es-adj"><button type="button" class="btn" id="crepi-garder">Garder ce produit</button><a class="btn" id="crepi-partager" href="#">Partager avec la communauté</a></div>
+      <small class="info-prod">Prépare un mail avec ces chiffres : le produit sera ajouté à l'appli pour tous les maçons. Rien ne part sans toi.</small>
+    </div>
     <div class="grid2">
       <label>Surface <small>m²</small><input id="crepi-surf" type="number" inputmode="decimal" value="45"></label>
       <label>Épaisseur <small>mm</small><input id="crepi-ep" type="number" inputmode="decimal" value="15"></label>
@@ -188,6 +196,12 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
   <section class="panel" id="p-colle" hidden>
     <h2>Colle à carrelage</h2>
     <label>Produit <select id="colle-prod"></select></label>
+    <div class="autre" id="colle-autre" hidden>
+      <label>Nom du produit <small>marque + nom sur le sac</small><input id="colle-autre-nom" type="text"></label>
+      <small class="info-prod">Recopie ce qui est écrit sur le sac dans les cases ci-dessous.</small>
+      <div class="es-adj"><button type="button" class="btn" id="colle-garder">Garder ce produit</button><a class="btn" id="colle-partager" href="#">Partager avec la communauté</a></div>
+      <small class="info-prod">Prépare un mail avec ces chiffres : le produit sera ajouté à l'appli pour tous les maçons. Rien ne part sans toi.</small>
+    </div>
     <div class="grid2">
       <label>Surface <small>m²</small><input id="colle-surf" type="number" inputmode="decimal" value="20"></label>
       <label>Peigne <small>selon le carreau</small>
@@ -225,7 +239,18 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
         <option value="20|6.6|fin" data-info="Joints de 1 à 4 mm. Sac de 20 kg, 6,4 à 6,8 L d'eau (fiche Edilis).">Edilis Joint fin, sac 20 kg</option>
         <option value="25|3.45|rustic" data-info="Joints larges de 5 à 50 mm. Sac de 25 kg, 3,2 à 3,7 L d'eau (fiche Edilis).">Edilis Joint rustic, sac 25 kg</option>
         <option value="5|1.65|fin" data-info="Joints de 1 à 4 mm. Seau de 5 kg, 1,6 à 1,7 L d'eau (fiche Edilis).">Edilis Joint fin, seau 5 kg</option>
+        <option value="autre">Autre produit…</option>
       </select></label>
+    <div class="autre" id="jo-autre" hidden>
+      <label>Nom du produit <small>marque + nom sur le sac</small><input id="jo-autre-nom" type="text"></label>
+      <div class="grid2">
+        <label>Sac <small>kg</small><input id="jo-sac" type="number" inputmode="decimal" value="20"></label>
+        <label>Eau par sac <small>litres</small><input id="jo-eau" type="number" inputmode="decimal" step="0.1" value="6"></label>
+      </div>
+      <small class="info-prod">Recopie ce qui est écrit sur le sac.</small>
+      <div class="es-adj"><a class="btn" id="jo-partager" href="#">Partager avec la communauté</a></div>
+      <small class="info-prod">Prépare un mail avec ces chiffres : le produit sera ajouté à l'appli pour tous les maçons. Rien ne part sans toi.</small>
+    </div>
     <div class="grid2">
       <label>Surface <small>m²</small><input id="jo-surf" type="number" inputmode="decimal" value="20"></label>
       <label>Largeur du joint <small>mm</small><input id="jo-larg" type="number" inputmode="decimal" value="3"></label>
@@ -542,7 +567,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.15 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.16 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -603,15 +628,21 @@ function fillSelect(type) {
   const sel = $(type + '-prod'); const cur = sel.value;
   const list = [...produits.filter(p => p.type === type), ...DEFAULTS[type]];
   const at = t => String(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
-  sel.innerHTML = list.map(p => `<option value="${p.id}"${p.info ? ` data-info="${at(p.info)}"` : ''}>${p.nom.replace(/</g, '&lt;')}</option>`).join('');
-  if (list.some(p => p.id === cur)) sel.value = cur;
+  sel.innerHTML = list.map(p => `<option value="${p.id}"${p.info ? ` data-info="${at(p.info)}"` : ''}>${p.nom.replace(/</g, '&lt;')}</option>`).join('') + '<option value="autre">Autre produit…</option>';
+  if (cur === 'autre' || list.some(p => p.id === cur)) sel.value = cur;
   majInfo(sel);
 }
 function current(type) {
   const id = $(type + '-prod').value;
+  if (id === 'autre') return { id, nom: $(type + '-autre-nom').value.trim() || 'Autre produit', sac: num(type + '-sac'), eau: num(type + '-eau'), conso: type === 'crepi' ? num('crepi-conso') : 0 };
   return [...produits, ...DEFAULTS[type]].find(x => x.id === id) || DEFAULTS[type][0];
 }
 function applyProduct(type) {
+  $(type + '-autre').hidden = $(type + '-prod').value !== 'autre';
+  if ($(type + '-prod').value === 'autre') { // produit non référencé : on garde ce qui est tapé dans les cases
+    if (type === 'colle') $('colle-peigne').innerHTML = PEIGNES_COURANTS.map((x, i) => `<option value="${i}">${x.l}</option>`).join('');
+    return;
+  }
   const p = current(type);
   $(type + '-sac').value = p.sac; $(type + '-eau').value = p.eau;
   if (type === 'colle') {
@@ -764,15 +795,16 @@ function calcMur() {
 }
 // Joints : formule courante des fabricants, kg/m² = (A + B) / (A x B) x largeur x profondeur x densité (mm, densité 1,7)
 function calcJoints() {
-  const [sac, eau, type] = $('jo-prod').value.split('|');
+  const autre = $('jo-prod').value === 'autre'; $('jo-autre').hidden = !autre;
+  const [sac, eau, type] = autre ? [String(num('jo-sac') || 20), String(num('jo-eau')), ''] : $('jo-prod').value.split('|');
   const A = num('jo-a') * 10, B = num('jo-b') * 10, C = num('jo-larg'), D = num('jo-ep');
   const conso = A && B ? (A + B) / (A * B) * C * D * 1.7 : 0;
   const kg = num('jo-surf') * conso * (1 + num('jo-marge') / 100);
   const sacs = Math.max(1, Math.ceil(kg / parseFloat(sac)));
-  const nom = $('jo-prod').selectedOptions[0].textContent.split(' (')[0];
+  const nom = autre ? ($('jo-autre-nom').value.trim() || 'Joint') : $('jo-prod').selectedOptions[0].textContent.split(' (')[0];
   const unite = parseFloat(sac) === 5 ? `seau${sacs > 1 ? 'x' : ''} de 5 kg` : `sac${sacs > 1 ? 's' : ''} de ${sac} kg`;
   ACHATS.joints = { titre: `Joints : ${fmt(num('jo-surf'), 1)} m², carreau ${fmt(num('jo-a'), 0)}x${fmt(num('jo-b'), 0)}`, items: [[nom, sacs, unite]] };
-  const hors = type === 'fin' ? C > 4 : C < 5;
+  const hors = type === 'fin' ? C > 4 : type === 'rustic' ? C < 5 : false;
   $('jo-res').innerHTML = `<div class="big">${sacs} <span>${unite}</span></div>
     <dl class="rows"><dt>Consommation</dt><dd>${fmt(conso, 2)} kg/m²</dd>
     <dt>Poids total</dt><dd>${fmt(kg, 1)} kg</dd>
@@ -840,7 +872,7 @@ function calcEscalier() {
 }
 // Choix en gros boutons (un par ligne) à la place d'un menu déroulant : le menu reste caché et garde la valeur
 // Petits plans vus de dessus : formes d'escalier (flèche dans le sens de la montée), poses de carrelage, semelles
-const ICONES = { pdecal: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V22M38 6V22M14 22V38M30 22V38M46 22V38M22 38V54M38 38V54" stroke-width="1.5"/></svg>', pbaton: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 6L18 18L6 30L18 42L6 54M18 6L30 18L18 30L30 42L18 54M30 6L42 18L30 30L42 42L30 54M42 6L54 18L42 30L54 42L42 54" stroke-width="1.5"/></svg>', popus: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30H54M30 6V30M30 18H54M18 30V54M42 30V54M42 42H54" stroke-width="1.5"/></svg>', pincertum: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 24L20 20L28 6M20 20L26 34L6 38M26 34L42 30L54 36M42 30L36 6M26 34L30 54M42 30L44 54" stroke-width="1.5"/></svg>', pdroite: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V54M38 6V54" stroke-width="1.5"/></svg>', pdiag: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30L30 6M6 54L54 6M30 54L54 30M6 30L30 54M6 6L54 54M30 6L54 30" stroke-width="1.5"/></svg>', pchevron: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 18L18 8L30 18L42 8L54 18M6 30L18 20L30 30L42 20L54 30M6 42L18 32L30 42L42 32L54 42M6 54L18 44L30 54L42 44L54 54" stroke-width="1.5"/></svg>', sfil: '<svg viewBox="0 0 60 60"><rect x="4" y="20" width="52" height="20"/><rect x="4" y="26" width="52" height="8" stroke-width="1.5"/><path d="M10 34l8-8M18 34l8-8M26 34l8-8M34 34l8-8M42 34l8-8" stroke-width="1"/></svg>', siso: '<svg viewBox="0 0 60 60"><rect x="12" y="12" width="36" height="36"/><rect x="24" y="24" width="12" height="12" stroke-width="1.5"/><path d="M24 32l4-4M28 36l8-8M32 36l4-4" stroke-width="1"/></svg>', droit: '<svg viewBox="0 0 60 60"><rect x="20" y="3" width="20" height="54"/><path d="M20 9H40M20 15H40M20 21H40M20 27H40M20 33H40M20 39H40M20 45H40M20 51H40" stroke-width="1"/><path d="M30 54V8M26 12l4-5 4 5"/></svg>', quart: '<svg viewBox="0 0 60 60"><path d="M5 57V3h52v20H25v34z"/><path d="M5 23h20V3" stroke-width="1"/><path d="M5 29H25M5 35H25M5 41H25M5 47H25M5 53H25M31 3V23M37 3V23M43 3V23M49 3V23M55 3V23" stroke-width="1"/><path d="M15 54V13h37M48 9l5 4-5 4"/></svg>', demi: '<svg viewBox="0 0 60 60"><path d="M4 57V3h52v54H34V23h-8v34z"/><path d="M4 23h22M34 23h22" stroke-width="1"/><path d="M4 29H26M4 35H26M4 41H26M4 47H26M4 53H26M34 29H56M34 35H56M34 41H56M34 47H56M34 53H56" stroke-width="1"/><path d="M15 54V13h30v41M41 50l4 5 4-5"/></svg>' };
+const ICONES = { pdecal: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V22M38 6V22M14 22V38M30 22V38M46 22V38M22 38V54M38 38V54" stroke-width="1.5"/></svg>', pbaton: '<svg viewBox="0 0 60 60"><defs><clipPath id="cb"><rect x="6" y="6" width="48" height="48"/></clipPath></defs><g clip-path="url(#cb)" stroke-width="1.5"><rect x="-10" y="-10" width="16" height="8"/><rect x="-10" y="-2" width="8" height="16"/><rect x="-10" y="22" width="16" height="8"/><rect x="-10" y="30" width="8" height="16"/><rect x="-10" y="54" width="16" height="8"/><rect x="-10" y="62" width="8" height="16"/><rect x="-2" y="-2" width="16" height="8"/><rect x="-2" y="6" width="8" height="16"/><rect x="-2" y="30" width="16" height="8"/><rect x="-2" y="38" width="8" height="16"/><rect x="-2" y="62" width="16" height="8"/><rect x="6" y="6" width="16" height="8"/><rect x="6" y="14" width="8" height="16"/><rect x="6" y="38" width="16" height="8"/><rect x="6" y="46" width="8" height="16"/><rect x="14" y="-10" width="8" height="16"/><rect x="14" y="14" width="16" height="8"/><rect x="14" y="22" width="8" height="16"/><rect x="14" y="46" width="16" height="8"/><rect x="14" y="54" width="8" height="16"/><rect x="22" y="-10" width="16" height="8"/><rect x="22" y="-2" width="8" height="16"/><rect x="22" y="22" width="16" height="8"/><rect x="22" y="30" width="8" height="16"/><rect x="22" y="54" width="16" height="8"/><rect x="22" y="62" width="8" height="16"/><rect x="30" y="-2" width="16" height="8"/><rect x="30" y="6" width="8" height="16"/><rect x="30" y="30" width="16" height="8"/><rect x="30" y="38" width="8" height="16"/><rect x="30" y="62" width="16" height="8"/><rect x="38" y="6" width="16" height="8"/><rect x="38" y="14" width="8" height="16"/><rect x="38" y="38" width="16" height="8"/><rect x="38" y="46" width="8" height="16"/><rect x="46" y="-10" width="8" height="16"/><rect x="46" y="14" width="16" height="8"/><rect x="46" y="22" width="8" height="16"/><rect x="46" y="46" width="16" height="8"/><rect x="46" y="54" width="8" height="16"/><rect x="54" y="-10" width="16" height="8"/><rect x="54" y="-2" width="8" height="16"/><rect x="54" y="22" width="16" height="8"/><rect x="54" y="30" width="8" height="16"/><rect x="54" y="54" width="16" height="8"/><rect x="54" y="62" width="8" height="16"/><rect x="62" y="-2" width="16" height="8"/><rect x="62" y="6" width="8" height="16"/><rect x="62" y="30" width="16" height="8"/><rect x="62" y="38" width="8" height="16"/><rect x="62" y="62" width="16" height="8"/></g><rect x="6" y="6" width="48" height="48"/></svg>', popus: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30H54M30 6V30M30 18H54M18 30V54M42 30V54M42 42H54" stroke-width="1.5"/></svg>', pincertum: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 24L20 20L28 6M20 20L26 34L6 38M26 34L42 30L54 36M42 30L36 6M26 34L30 54M42 30L44 54" stroke-width="1.5"/></svg>', pdroite: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V54M38 6V54" stroke-width="1.5"/></svg>', pdiag: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30L30 6M6 54L54 6M30 54L54 30M6 30L30 54M6 6L54 54M30 6L54 30" stroke-width="1.5"/></svg>', pchevron: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 18L18 8L30 18L42 8L54 18M6 30L18 20L30 30L42 20L54 30M6 42L18 32L30 42L42 32L54 42M6 54L18 44L30 54L42 44L54 54" stroke-width="1.5"/></svg>', sfil: '<svg viewBox="0 0 60 60"><rect x="4" y="20" width="52" height="20"/><rect x="4" y="26" width="52" height="8" stroke-width="1.5"/><path d="M10 34l8-8M18 34l8-8M26 34l8-8M34 34l8-8M42 34l8-8" stroke-width="1"/></svg>', siso: '<svg viewBox="0 0 60 60"><rect x="12" y="12" width="36" height="36"/><rect x="24" y="24" width="12" height="12" stroke-width="1.5"/><path d="M24 32l4-4M28 36l8-8M32 36l4-4" stroke-width="1"/></svg>', droit: '<svg viewBox="0 0 60 60"><rect x="20" y="3" width="20" height="54"/><path d="M20 9H40M20 15H40M20 21H40M20 27H40M20 33H40M20 39H40M20 45H40M20 51H40" stroke-width="1"/><path d="M30 54V8M26 12l4-5 4 5"/></svg>', quart: '<svg viewBox="0 0 60 60"><path d="M5 57V3h52v20H25v34z"/><path d="M5 23h20V3" stroke-width="1"/><path d="M5 29H25M5 35H25M5 41H25M5 47H25M5 53H25M31 3V23M37 3V23M43 3V23M49 3V23M55 3V23" stroke-width="1"/><path d="M15 54V13h37M48 9l5 4-5 4"/></svg>', demi: '<svg viewBox="0 0 60 60"><path d="M4 57V3h52v54H34V23h-8v34z"/><path d="M4 23h22M34 23h22" stroke-width="1"/><path d="M4 29H26M4 35H26M4 41H26M4 47H26M4 53H26M34 29H56M34 35H56M34 41H56M34 47H56M34 53H56" stroke-width="1"/><path d="M15 54V13h30v41M41 50l4 5 4-5"/></svg>' };
 function majSeg(sel) { sel._seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === sel.value)); }
 document.querySelectorAll('.seg-src').forEach(sel => {
   const box = document.createElement('div'); box.className = 'seg' + (sel.dataset.icons ? ' seg-ico' : '');
@@ -979,6 +1011,21 @@ $('np-add').addEventListener('click', () => {
   $(type + '-prod').value = p.id; applyProduct(type); calcCrepi(); calcColle();
   msg.textContent = `« ${nom} » enregistré.`; $('np-nom').value = '';
 });
+// Produit non référencé : le garder sur le téléphone, ou le partager par mail (volontaire) pour l'ajouter à l'appli
+['crepi', 'colle'].forEach(t => $(t + '-garder').addEventListener('click', () => {
+  const nom = $(t + '-autre-nom').value.trim();
+  if (!nom || !num(t + '-sac')) { $(t + '-autre-nom').focus(); return; }
+  const p = { id: 'p' + Date.now(), nom, type: t, sac: num(t + '-sac'), eau: num(t + '-eau'), conso: t === 'crepi' ? num('crepi-conso') : 0 };
+  produits.unshift(p); save(); refresh(); $(t + '-prod').value = p.id; $(t + '-autre-nom').value = '';
+  applyProduct(t); t === 'crepi' ? calcCrepi() : calcColle(); saveChamps();
+}));
+['crepi', 'colle', 'jo'].forEach(t => $(t + '-partager').addEventListener('click', () => {
+  const type = { crepi: 'Crépi / enduit', colle: 'Colle à carrelage', jo: 'Joint de carrelage' }[t];
+  const lignes = [`Type : ${type}`, `Produit : ${$(t + '-autre-nom').value.trim() || '?'}`, `Sac : ${fmt(num(t + '-sac'))} kg`, `Eau par sac : ${fmt(num(t + '-eau'))} L`];
+  if (t === 'crepi') lignes.push(`Consommation : ${fmt(num('crepi-conso'))} kg/m² par mm`);
+  lignes.push('Magasin où je l\'ai trouvé : ', '', '(Une photo du dos du sac aide beaucoup.)');
+  $(t + '-partager').href = `mailto:${AVIS_MAIL}?subject=${encodeURIComponent('Produit à ajouter au Bon Dosage')}&body=${encodeURIComponent(lignes.join('\n'))}`;
+}));
 $('np-list').addEventListener('click', e => {
   const id = e.target.dataset.del; if (!id) return;
   produits = produits.filter(p => p.id !== id); save(); refresh();
