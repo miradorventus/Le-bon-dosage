@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Le Bon Dosage : calculatrice béton, crépi et colle carrelage pour maçon</title>
+<title>Le Bon Dosage : calculatrice de chantier pour maçon (béton, crépi, carrelage)</title>
 <meta name="description" content="Calculatrice de maçonnerie gratuite, sans pub et hors ligne : dosage béton pour semelle et dalle, crépi, colle carrelage, chape, parpaings, treillis soudé, poteaux, castine. Sacs de ciment, sable, gravier et eau en seaux.">
 <link rel="canonical" href="https://miradorventus.github.io/Le-bon-dosage/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="Le Bon Dosage : calculs de chantier pour maçon">
+<meta property="og:title" content="Le Bon Dosage, calculatrice de chantier pour maçon">
 <meta property="og:description" content="Combien de sacs, de seaux d'eau, de m³ ? Béton, crépi, colle carrelage, chape, parpaings, treillis. Gratuit, sans pub, marche sans réseau.">
 <meta property="og:url" content="https://miradorventus.github.io/Le-bon-dosage/">
 <meta property="og:image" content="https://miradorventus.github.io/Le-bon-dosage/icon-512.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Le Bon Dosage","url":"https://miradorventus.github.io/Le-bon-dosage/","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS, Android, navigateur web","inLanguage":"fr","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"description":"Calculatrice de maçonnerie : dosage béton (semelle, dalle, poteau), crépi et enduit, colle à carrelage, chape, parpaings, treillis soudé, granulats. Hors ligne, sans compte ni pub.","author":{"@type":"Person","name":"miradorventus"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Le Bon Dosage","url":"https://miradorventus.github.io/Le-bon-dosage/","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS, Android, navigateur web","inLanguage":"fr","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"description":"Calculatrice de chantier : dosage béton (semelle, dalle, poteau), crépi et enduit, colle à carrelage, chape, parpaings, treillis soudé, granulats. Hors ligne, sans compte ni pub.","author":{"@type":"Person","name":"miradorventus"}}</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -143,7 +143,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
 <div class="wrap">
   <header>
     <h1>Le Bon Dosage</h1>
-    <p>Calculs de chantier pour le maçon. Tes calculs restent dans ce téléphone.</p>
+    <p>Calculatrice de chantier pour le maçon. Tes calculs restent dans ce téléphone.</p>
   </header>
 
   <main class="vue" id="v-calculs">
@@ -549,6 +549,12 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p id="av-adresse" hidden style="margin:0;font-size:.9rem;color:var(--muted)"></p>
     <p id="av-msg" style="margin:0;font-size:.9rem;color:var(--muted)" hidden></p>
   </section>
+  <section class="panel" id="soutien">
+    <h2>Soutenir l'appli</h2>
+    <p style="margin:0;color:var(--muted);font-size:.95rem">Le Bon Dosage est gratuit, sans pub et sans compte. S'il t'a évité de commander trois palettes de trop, paye ton café : c'est moins cher qu'un sac de ciment.</p>
+    <a class="btn solid" href="https://ko-fi.com/lebondosage" target="_blank" rel="noopener" style="align-self:flex-start;text-decoration:none">Payer un café</a>
+    <small class="info-prod">Ça ouvre la page Ko-fi du créateur. Le don se fait par carte, sans créer de compte.</small>
+  </section>
 
   </div>
 
@@ -567,10 +573,10 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
       <li><strong>Calcul d'escalier</strong> droit, quart ou demi-tournant : nombre de marches, hauteur et giron selon la règle de Blondel.</li>
       <li><strong>Treillis soudé</strong> (PAF, ST 25 C...), <strong>ferraillage des poteaux et chaînages</strong>, <strong>castine, sable, gravier</strong> en tonnes.</li>
     </ul>
-    <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
+    <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT). Pour soutenir l'appli : <a href="https://ko-fi.com/lebondosage" target="_blank" rel="noopener">ko-fi.com/lebondosage</a>.</p>
   </details>
 
-  <footer>Version 0.16.1 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.17 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">

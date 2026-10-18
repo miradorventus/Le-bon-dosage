@@ -1,7 +1,7 @@
 {
   "name": "Le Bon Dosage",
   "short_name": "Bon Dosage",
-  "description": "Calculs de chantier pour maçons : crépi, colle, béton, chape, granulats, parpaings, treillis, poteaux.",
+  "description": "Calculatrice de chantier pour maçons : béton, crépi, colle et joints, carrelage, escalier, chape, granulats, parpaings, treillis, poteaux.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
