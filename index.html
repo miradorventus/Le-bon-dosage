@@ -29,6 +29,7 @@
   --muted: #6e6056;
   --line: #dccfbe;
   --accent: #a8482a;    /* terre cuite */
+  --choix: #f6dccd;     /* fond d'un choix sélectionné */
   --accent-fg: #fffaf3;
   --warn-bg: #f3e6c4;   /* ocre */
   --warn-fg: #5e4410;
@@ -37,10 +38,10 @@
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #1e1915; --surface: #2a231e; --fg: #f1e8dc; --muted: #b3a493; --line: #46392e;
-  --accent: #e08a5f; --accent-fg: #24130a; --warn-bg: #3d3018; --warn-fg: #ecd18f; color-scheme: dark } }
+  --accent: #e08a5f; --choix: #4a2a1c; --accent-fg: #24130a; --warn-bg: #3d3018; --warn-fg: #ecd18f; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #1e1915; --surface: #2a231e; --fg: #f1e8dc; --muted: #b3a493; --line: #46392e;
-  --accent: #e08a5f; --accent-fg: #24130a; --warn-bg: #3d3018; --warn-fg: #ecd18f; color-scheme: dark }
+  --accent: #e08a5f; --choix: #4a2a1c; --accent-fg: #24130a; --warn-bg: #3d3018; --warn-fg: #ecd18f; color-scheme: dark }
 
 * { box-sizing: border-box }
 [hidden] { display: none !important }
@@ -72,13 +73,16 @@ button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px s
 .seg-titre { font-weight: 600 }
 .seg-ico { grid-auto-flow: column; grid-auto-columns: 1fr }
 .grid2 > label:has(> .seg-src) { grid-column: 1 / -1 }
+#p-carreaux .seg-ico { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr) }
 .seg-ico button { padding: 8px; text-align: center; display: grid; justify-items: center; gap: 2px }
 .seg-ico svg { width: 100%; max-width: 76px; height: auto; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
-.seg-ico small { font-size: .72rem; font-weight: 600 }
+.seg-ico small { font-size: .72rem; font-weight: 600; overflow-wrap: anywhere; hyphens: auto }
+.seg button { min-width: 0 }
 .recap { margin: 0; padding-left: 18px; display: grid; gap: 2px }
 .seg { display: grid; gap: 8px }
 .seg button { font: inherit; font-weight: 600; padding: 12px 14px; border: 2px solid var(--accent); border-radius: 6px; background: transparent; color: var(--accent); text-align: left; cursor: pointer }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface) }
+.seg button[aria-pressed="true"] { background: var(--choix); color: var(--fg); border-width: 3px; box-shadow: inset 0 0 0 1px var(--accent) }
+.seg button[aria-pressed="true"] svg { stroke: var(--accent) }
 .es-adj { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
 label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: .9rem; min-width: 0 }
 label small { font-weight: 400; color: var(--muted) }
@@ -205,9 +209,9 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <div class="grid2">
       <label>Surface <small>m²</small><input id="ca-surf" type="number" inputmode="decimal" value="20"></label>
       <label>Pose
-        <select id="ca-pose" class="seg-src" data-icons="1"><option value="10" data-ico="pdroite">Droite</option><option value="15" data-ico="pdiag" data-court="Diagonale">Décalée ou diagonale</option><option value="20" data-ico="pchevron" data-court="Chevron">Chevron ou point de Hongrie</option></select></label>
-      <label>Carreau, longueur <small>cm</small><input id="ca-a" type="number" inputmode="decimal" value="60"></label>
-      <label>Carreau, largeur <small>cm</small><input id="ca-b" type="number" inputmode="decimal" value="60"></label>
+        <select id="ca-pose" class="seg-src" data-icons="1"><option value="droite" data-marge="10" data-ico="pdroite">Droite</option><option value="decalee" data-marge="10" data-ico="pdecal">Décalée</option><option value="diagonale" data-marge="15" data-ico="pdiag">Diagonale</option><option value="chevron" data-marge="20" data-ico="pchevron" data-court="Chevron">Chevron ou point de Hongrie</option><option value="baton" data-marge="15" data-ico="pbaton">Bâton rompu</option><option value="opus" data-marge="10" data-ico="popus">Opus romain</option><option value="incertum" data-marge="20" data-ico="pincertum">Opus incertum</option></select></label>
+      <label id="ca-a-lab">Carreau, longueur <small>cm</small><input id="ca-a" type="number" inputmode="decimal" value="60"></label>
+      <label id="ca-b-lab">Carreau, largeur <small>cm</small><input id="ca-b" type="number" inputmode="decimal" value="60"></label>
       <label>Marge de coupe <small>%</small><input id="ca-marge" type="number" inputmode="decimal" value="10"></label>
     </div>
     <div class="result" id="ca-res"></div>
@@ -319,16 +323,17 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <h2>Montage de parpaings ou briques</h2>
     <label>Bloc
       <select id="mur-bloc">
-        <option value="10|20">Parpaing 50x20, ép. 20 cm</option>
-        <option value="10|15">Parpaing 50x20, ép. 15 cm</option>
-        <option value="10|10">Parpaing 50x20, ép. 10 cm</option>
-        <option value="10|20b">Brique 50x20 (collée ou mortier)</option>
-        <option value="8|20">Bloc 50x25, ép. 20 cm</option>
+        <option value="10|20" data-pal="60">Parpaing 50x20, ép. 20 cm</option>
+        <option value="10|15" data-pal="80">Parpaing 50x20, ép. 15 cm</option>
+        <option value="10|10" data-pal="120">Parpaing 50x20, ép. 10 cm</option>
+        <option value="10|20b" data-pal="60">Brique 50x20 (collée ou mortier)</option>
+        <option value="8|20" data-pal="48">Bloc 50x25, ép. 20 cm</option>
       </select></label>
     <div class="grid2">
       <label>Longueur de mur <small>m</small><input id="mur-l" type="number" inputmode="decimal" value="24"></label>
       <label>Hauteur <small>m</small><input id="mur-h" type="number" inputmode="decimal" value="2.5"></label>
       <label>Ouvertures à déduire <small>m² (portes, fenêtres)</small><input id="mur-ouv" type="number" inputmode="decimal" value="6"></label>
+      <label>Blocs par palette <small>voir l'étiquette</small><input id="mur-pal" type="number" inputmode="numeric" value="60"></label>
       <label>Mortier
         <select id="mur-mortier" class="seg-src"><option value="fait">Fait sur place (ciment + sable)</option><option value="obra" data-info="Mortier prêt à gâcher en sac de 25 kg, vendu chez Chausson : 1 sac pour 0,5 m² de parpaings de 20, 3,5 L d'eau par sac.">Mortier OBRA M10 prêt à gâcher</option></select></label>
       <label>Sac de ciment <small>kg</small>
@@ -537,7 +542,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT).</p>
   </details>
 
-  <footer>Version 0.14 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.15 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -731,20 +736,25 @@ function calcMur() {
   const sac = num('mur-sac'), ciment = mortier * 300;
   const obra = $('mur-mortier').value === 'obra';
   $('mur-sac').parentElement.hidden = obra;
+  const pal = Math.round(num('mur-pal')), reste = pal ? blocs % pal : 0;
+  // Liste de courses : en palettes entières + blocs au détail, comme on commande au fournisseur
+  const nomBloc = $('mur-bloc').selectedOptions[0].textContent;
+  const itBlocs = pal && blocs >= pal ? [[nomBloc, Math.floor(blocs / pal), `palettes de ${pal}`], ...(reste ? [[nomBloc, reste, 'pièces']] : [])] : [[nomBloc, blocs, 'pièces']];
+  const palettes = pal ? `<dt>Palettes</dt><dd>${Math.floor(blocs / pal)}${reste ? ` + ${reste} bloc${reste > 1 ? 's' : ''}` : ''}</dd>` : '';
   if (obra) {
     // Fiche technique OBRA M10 (Chausson, 2023) : 1 sac de 25 kg = 13 L de mortier = 0,5 m² de parpaings de 20 ; 3,5 L d'eau par sac
     const sacs = Math.ceil(surf * parseFloat(ep) / 20 / 0.5);
-    ACHATS.mur = { titre: `Mur : ${fmt(surf, 1)} m²`, items: [[$('mur-bloc').selectedOptions[0].textContent, blocs, 'pièces'], ['Mortier OBRA M10', sacs, 'sacs de 25 kg']] };
+    ACHATS.mur = { titre: `Mur : ${fmt(surf, 1)} m²`, items: [...itBlocs, ['Mortier OBRA M10', sacs, 'sacs de 25 kg']] };
     $('mur-res').innerHTML = `<div class="big">${blocs} <span>blocs</span></div>
-    <dl class="rows"><dt>Surface de mur</dt><dd>${fmt(surf, 1)} m²</dd>
+    <dl class="rows">${palettes}<dt>Surface de mur</dt><dd>${fmt(surf, 1)} m²</dd>
     <dt>Mortier OBRA M10</dt><dd>${sacs} sacs de 25 kg</dd>
     <dt>Eau par sac</dt><dd>3,5 L</dd></dl>
     <div class="note">Chiffres de la fiche OBRA : 1 sac pour 0,5 m² de parpaings de 20. Vérifie le sac.</div>`;
     return;
   }
-  ACHATS.mur = { titre: `Mur : ${fmt(surf, 1)} m²`, items: [[$('mur-bloc').selectedOptions[0].textContent, blocs, 'pièces'], ['Ciment Lafarge', Math.ceil(ciment / sac), `sacs de ${sac} kg`], ['Sable 0/4', r2(mortier), 'm³']] };
+  ACHATS.mur = { titre: `Mur : ${fmt(surf, 1)} m²`, items: [...itBlocs, ['Ciment Lafarge', Math.ceil(ciment / sac), `sacs de ${sac} kg`], ['Sable 0/4', r2(mortier), 'm³']] };
   $('mur-res').innerHTML = `<div class="big">${blocs} <span>blocs</span></div>
-    <dl class="rows"><dt>Surface de mur</dt><dd>${fmt(surf, 1)} m²</dd>
+    <dl class="rows">${palettes}<dt>Surface de mur</dt><dd>${fmt(surf, 1)} m²</dd>
     <dt>Mortier de montage</dt><dd>${fmt(mortier * 1000, 0)} L</dd>
     <dt>Ciment</dt><dd>${Math.ceil(ciment / sac)} sacs de ${sac} kg</dd>
     <dt>Sable 0/4</dt><dd>${fmt(mortier, 2)} m³ (≈ ${fmt(mortier * 1.6, 1)} t)</dd>
@@ -771,18 +781,23 @@ function calcJoints() {
 }
 // Carreaux : commandés au m² (le fournisseur compte les palettes) ; surface + marge de coupe selon la pose
 function calcCarreaux() {
-  const surf = num('ca-surf'), a = num('ca-a'), b = num('ca-b');
+  const surf = num('ca-surf'), a = num('ca-a'), b = num('ca-b'), pose = $('ca-pose').value;
+  const opus = pose === 'opus' || pose === 'incertum'; // formats mélangés : on commande au m², sans compter les pièces
+  $('ca-a-lab').hidden = $('ca-b-lab').hidden = opus;
   const m2 = surf * (1 + num('ca-marge') / 100);
   const unit = a * b / 10000;
   const nb = unit ? Math.ceil(m2 / unit) : 0;
-  ACHATS.carreaux = { titre: `Carreaux : ${fmt(surf, 1)} m², ${fmt(a, 0)}x${fmt(b, 0)}`,
-    items: [[`Carreaux ${fmt(a, 0)}x${fmt(b, 0)}`, r2(m2), 'm²']] };
+  const nom = pose === 'opus' ? 'Carrelage opus romain' : pose === 'incertum' ? 'Dallage opus incertum' : `Carreaux ${fmt(a, 0)}x${fmt(b, 0)}`;
+  ACHATS.carreaux = { titre: `${nom} : ${fmt(surf, 1)} m²`, items: [[nom, r2(m2), 'm²']] };
+  const note = pose === 'opus' ? 'Vendu en kit au m², les formats sont déjà mélangés dans la bonne proportion. Commande tout dans le même lot.'
+    : pose === 'incertum' ? 'Pierres irrégulières vendues au m² (parfois à la tonne : demande la correspondance au fournisseur).'
+    : 'Commande tout en une fois, dans le même lot (même nuance et calibre), et garde quelques carreaux pour les réparations.';
   $('ca-res').innerHTML = `<div class="big">${fmt(m2, 2)} <span>m² à commander</span></div>
-    <dl class="rows"><dt>Carreaux</dt><dd>${nb}</dd>
+    <dl class="rows">${opus ? '' : `<dt>Carreaux</dt><dd>${nb}</dd>`}
     <dt>Dont marge de coupe</dt><dd>${fmt(m2 - surf, 2)} m²</dd></dl>
-    <div class="note">Commande tout en une fois, dans le même lot (même nuance et calibre), et garde quelques carreaux pour les réparations.</div>`;
+    <div class="note">${note}</div>`;
 }
-$('ca-pose').addEventListener('change', () => { $('ca-marge').value = $('ca-pose').value; calcCarreaux(); });
+$('ca-pose').addEventListener('change', () => { $('ca-marge').value = $('ca-pose').selectedOptions[0].dataset.marge; calcCarreaux(); });
 // Escalier coulé (droit, quart ou demi-tournant) : marches par la règle de Blondel (2 h + g ≈ 63 cm, h ≈ 17 cm),
 // giron sur la ligne de foulée ; béton = paillasse + marches (+ palier), volume approché pour les escaliers tournants
 function calcEscalier() {
@@ -825,7 +840,7 @@ function calcEscalier() {
 }
 // Choix en gros boutons (un par ligne) à la place d'un menu déroulant : le menu reste caché et garde la valeur
 // Petits plans vus de dessus : formes d'escalier (flèche dans le sens de la montée), poses de carrelage, semelles
-const ICONES = { pdroite: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V54M38 6V54" stroke-width="1.5"/></svg>', pdiag: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30L30 6M6 54L54 6M30 54L54 30M6 30L30 54M6 6L54 54M30 6L54 30" stroke-width="1.5"/></svg>', pchevron: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 18L18 8L30 18L42 8L54 18M6 30L18 20L30 30L42 20L54 30M6 42L18 32L30 42L42 32L54 42M6 54L18 44L30 54L42 44L54 54" stroke-width="1.5"/></svg>', sfil: '<svg viewBox="0 0 60 60"><rect x="4" y="20" width="52" height="20"/><rect x="4" y="26" width="52" height="8" stroke-width="1.5"/><path d="M10 34l8-8M18 34l8-8M26 34l8-8M34 34l8-8M42 34l8-8" stroke-width="1"/></svg>', siso: '<svg viewBox="0 0 60 60"><rect x="12" y="12" width="36" height="36"/><rect x="24" y="24" width="12" height="12" stroke-width="1.5"/><path d="M24 32l4-4M28 36l8-8M32 36l4-4" stroke-width="1"/></svg>', droit: '<svg viewBox="0 0 60 60"><rect x="20" y="3" width="20" height="54"/><path d="M20 9H40M20 15H40M20 21H40M20 27H40M20 33H40M20 39H40M20 45H40M20 51H40" stroke-width="1"/><path d="M30 54V8M26 12l4-5 4 5"/></svg>', quart: '<svg viewBox="0 0 60 60"><path d="M5 57V3h52v20H25v34z"/><path d="M5 23h20V3" stroke-width="1"/><path d="M5 29H25M5 35H25M5 41H25M5 47H25M5 53H25M31 3V23M37 3V23M43 3V23M49 3V23M55 3V23" stroke-width="1"/><path d="M15 54V13h37M48 9l5 4-5 4"/></svg>', demi: '<svg viewBox="0 0 60 60"><path d="M4 57V3h52v54H34V23h-8v34z"/><path d="M4 23h22M34 23h22" stroke-width="1"/><path d="M4 29H26M4 35H26M4 41H26M4 47H26M4 53H26M34 29H56M34 35H56M34 41H56M34 47H56M34 53H56" stroke-width="1"/><path d="M15 54V13h30v41M41 50l4 5 4-5"/></svg>' };
+const ICONES = { pdecal: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V22M38 6V22M14 22V38M30 22V38M46 22V38M22 38V54M38 38V54" stroke-width="1.5"/></svg>', pbaton: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 6L18 18L6 30L18 42L6 54M18 6L30 18L18 30L30 42L18 54M30 6L42 18L30 30L42 42L30 54M42 6L54 18L42 30L54 42L42 54" stroke-width="1.5"/></svg>', popus: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30H54M30 6V30M30 18H54M18 30V54M42 30V54M42 42H54" stroke-width="1.5"/></svg>', pincertum: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 24L20 20L28 6M20 20L26 34L6 38M26 34L42 30L54 36M42 30L36 6M26 34L30 54M42 30L44 54" stroke-width="1.5"/></svg>', pdroite: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 22H54M6 38H54M22 6V54M38 6V54" stroke-width="1.5"/></svg>', pdiag: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 30L30 6M6 54L54 6M30 54L54 30M6 30L30 54M6 6L54 54M30 6L54 30" stroke-width="1.5"/></svg>', pchevron: '<svg viewBox="0 0 60 60"><rect x="6" y="6" width="48" height="48"/><path d="M6 18L18 8L30 18L42 8L54 18M6 30L18 20L30 30L42 20L54 30M6 42L18 32L30 42L42 32L54 42M6 54L18 44L30 54L42 44L54 54" stroke-width="1.5"/></svg>', sfil: '<svg viewBox="0 0 60 60"><rect x="4" y="20" width="52" height="20"/><rect x="4" y="26" width="52" height="8" stroke-width="1.5"/><path d="M10 34l8-8M18 34l8-8M26 34l8-8M34 34l8-8M42 34l8-8" stroke-width="1"/></svg>', siso: '<svg viewBox="0 0 60 60"><rect x="12" y="12" width="36" height="36"/><rect x="24" y="24" width="12" height="12" stroke-width="1.5"/><path d="M24 32l4-4M28 36l8-8M32 36l4-4" stroke-width="1"/></svg>', droit: '<svg viewBox="0 0 60 60"><rect x="20" y="3" width="20" height="54"/><path d="M20 9H40M20 15H40M20 21H40M20 27H40M20 33H40M20 39H40M20 45H40M20 51H40" stroke-width="1"/><path d="M30 54V8M26 12l4-5 4 5"/></svg>', quart: '<svg viewBox="0 0 60 60"><path d="M5 57V3h52v20H25v34z"/><path d="M5 23h20V3" stroke-width="1"/><path d="M5 29H25M5 35H25M5 41H25M5 47H25M5 53H25M31 3V23M37 3V23M43 3V23M49 3V23M55 3V23" stroke-width="1"/><path d="M15 54V13h37M48 9l5 4-5 4"/></svg>', demi: '<svg viewBox="0 0 60 60"><path d="M4 57V3h52v54H34V23h-8v34z"/><path d="M4 23h22M34 23h22" stroke-width="1"/><path d="M4 29H26M4 35H26M4 41H26M4 47H26M4 53H26M34 29H56M34 35H56M34 41H56M34 47H56M34 53H56" stroke-width="1"/><path d="M15 54V13h30v41M41 50l4 5 4-5"/></svg>' };
 function majSeg(sel) { sel._seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === sel.value)); }
 document.querySelectorAll('.seg-src').forEach(sel => {
   const box = document.createElement('div'); box.className = 'seg' + (sel.dataset.icons ? ' seg-ico' : '');
@@ -1007,6 +1022,8 @@ document.querySelectorAll('#p-dalle input, #p-dalle select').forEach(i => i.addE
 $('gr-mat').addEventListener('change', () => { applyMat(); calcGranulats(); });
 document.querySelectorAll('#p-granulats input').forEach(i => i.addEventListener('input', calcGranulats));
 document.querySelectorAll('#p-mur input, #p-mur select').forEach(i => i.addEventListener('input', calcMur));
+// Palette : nombre courant selon le bloc (Alkern, Fabemi...), modifiable d'après l'étiquette
+$('mur-bloc').addEventListener('change', () => { $('mur-pal').value = $('mur-bloc').selectedOptions[0].dataset.pal || $('mur-pal').value; calcMur(); });
 document.querySelectorAll('#p-treillis input, #p-treillis select').forEach(i => i.addEventListener('input', calcTreillis));
 document.querySelectorAll('#p-joints input, #p-joints select').forEach(i => i.addEventListener('input', calcJoints));
 document.querySelectorAll('#p-carreaux input').forEach(i => i.addEventListener('input', calcCarreaux));
