@@ -54,6 +54,9 @@ label.seau { flex-direction: row; align-items: center; font-size: 1rem }
 .wrap { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px }
 header h1 { font-family: var(--f-display); font-size: 2.2rem; margin: 0; letter-spacing: .02em; line-height: 1 }
 header p { margin: 4px 0 0; color: var(--muted); font-size: .95rem }
+.installer { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; padding: 12px; border: 2px solid var(--accent); border-radius: 8px; background: var(--choix); font-size: .95rem }
+.installer p { margin: 0; flex: 1; min-width: 0 }
+.installer button { flex: none; width: 44px; height: 44px; border: 0; background: transparent; color: var(--fg); font-size: 1.6rem; line-height: 1; cursor: pointer }
 .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: -6px }
 .cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px }
 .cats button { font-family: var(--f-display); font-size: 1.05rem; line-height: 1.1; letter-spacing: .02em; padding: 12px 4px; min-height: 56px;
@@ -145,6 +148,10 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <h1>Le Bon Dosage</h1>
     <p>Calculatrice de chantier pour les maçons. Tes calculs restent dans ce téléphone.</p>
   </header>
+  <div class="installer" id="installer" hidden>
+    <p><strong>📲 Installe Le Bon Dosage sur ton écran d'accueil</strong> : tes produits, ta liste et tes réglages seront bien gardés, même sans réseau.<br>iPhone : bouton Partager ⬆️ puis « Sur l'écran d'accueil ». Android : menu ⋮ puis « Installer l'application ».</p>
+    <button type="button" id="installer-x" aria-label="Fermer">×</button>
+  </div>
 
   <main class="vue" id="v-calculs">
   <nav class="cats" aria-label="Catégories">
@@ -553,7 +560,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <h2>Soutenir l'appli</h2>
     <p style="margin:0;color:var(--muted);font-size:.95rem">Le Bon Dosage est gratuit, sans pub et sans compte. S'il t'a évité de commander trois palettes de trop, paye ton café : c'est moins cher qu'un sac de ciment.</p>
     <a class="btn solid" href="https://ko-fi.com/lebondosage" target="_blank" rel="noopener" style="align-self:flex-start;text-decoration:none">Tu payes ton café ?</a>
-    <small class="info-prod">Ça ouvre la page Ko-fi du créateur. Le don se fait par carte, sans créer de compte.</small>
+    <small class="info-prod">Pour soutenir le créateur. Le don se fait par carte, sans créer de compte.</small>
   </section>
 
   </div>
@@ -576,7 +583,7 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>L'eau est donnée en seaux, comme sur le chantier. Sans compte, sans pub, sans cookies : seul un compteur de visites anonyme (GoatCounter) compte les ouvertures de la page, sans rien savoir de toi ni de tes calculs. Elle s'installe sur l'écran d'accueil de l'iPhone ou d'Android et marche sans réseau. Code libre (MIT). Pour soutenir l'appli : <a href="https://ko-fi.com/lebondosage" target="_blank" rel="noopener">ko-fi.com/lebondosage</a>.</p>
   </details>
 
-  <footer>Version 0.17.1 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
+  <footer>Version 0.18 (prototype). Les valeurs sont indicatives : vérifie toujours les indications de l'emballage et les plans. Appli indépendante, sans lien avec les marques citées. Tes calculs et tes produits ne quittent pas ce téléphone.</footer>
 </div>
 
 <nav class="bas" aria-label="Navigation">
@@ -1323,6 +1330,13 @@ applyProduct('crepi'); applyProduct('colle');
 CHAMPS.forEach(el => { if (el.id !== 'crepi-prod' && el.id !== 'colle-prod') remet(el.id); });
 try { const o = localStorage.getItem('gachee-onglet'); const b = o && document.querySelector(`.tabs button[data-tab="${o}"]`); if (b) b.click(); } catch (e) {}
 montreCat(document.querySelector('.tabs button[aria-selected="true"]').dataset.cat);
+// Bandeau d'installation : caché si l'appli est déjà sur l'écran d'accueil ; la croix le cache pour cette visite seulement
+(() => {
+  const installee = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  let ferme = false; try { ferme = sessionStorage.getItem('gachee-installer') === '1'; } catch (e) {}
+  $('installer').hidden = installee || ferme;
+  $('installer-x').addEventListener('click', () => { $('installer').hidden = true; try { sessionStorage.setItem('gachee-installer', '1'); } catch (e) {} });
+})();
 calcCrepi(); calcColle(); calcCarreaux(); calcJoints(); calcSemelle(); calcDalle(); calcChape(); calcGranulats(); calcMur(); calcTreillis(); calcPoteau(); calcOuverture(); calcEscalier();
 renderListe();
 const SEL_INFO = ['crepi-prod', 'colle-prod', 'jo-prod', 'mur-mortier', 'sem-gran', 'dal-gran', 'po-gran', 'ou-gran', 'es-gran'];
