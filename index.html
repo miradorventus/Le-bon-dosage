@@ -55,7 +55,8 @@ label.seau { flex-direction: row; align-items: center; font-size: 1rem }
 header h1 { font-family: var(--f-display); font-size: 2.2rem; margin: 0; letter-spacing: .02em; line-height: 1 }
 header p { margin: 4px 0 0; color: var(--muted); font-size: .95rem }
 .installer { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 0; padding: 12px; border: 2px solid var(--accent); border-radius: 8px; background: var(--choix); font-size: .95rem }
-.installer p { margin: 0; flex: 1; min-width: 0 }
+.installer-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px }
+.installer p { margin: 0 }
 .installer button { flex: none; width: 44px; height: 44px; border: 0; background: transparent; color: var(--fg); font-size: 1.6rem; line-height: 1; cursor: pointer }
 .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: -6px }
 .cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px }
@@ -149,7 +150,9 @@ nav.bas button[aria-current="page"]::before { content: ""; position: absolute; t
     <p>Calculatrice de chantier pour les maçons. Tes calculs restent dans ce téléphone.</p>
   </header>
   <div class="installer" id="installer" hidden>
-    <p><strong>📲 Installe Le Bon Dosage sur ton écran d'accueil</strong> : tes produits, ta liste et tes réglages seront bien gardés, même sans réseau.<br>iPhone : bouton Partager ⬆️ puis « Sur l'écran d'accueil ». Android : menu ⋮ puis « Installer l'application ».</p>
+    <div class="installer-txt"><p><strong>📲 Installe Le Bon Dosage sur ton écran d'accueil</strong> : tes produits, ta liste et tes réglages seront bien gardés, même sans réseau.</p>
+    <p><strong>iPhone</strong> : bouton Partager ⬆️ puis « Sur l'écran d'accueil ».</p>
+    <p><strong>Android</strong> : menu ⋮ puis « Installer l'application ».</p></div>
     <button type="button" id="installer-x" aria-label="Fermer">×</button>
   </div>
 
